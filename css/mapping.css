@@ -1,0 +1,1397 @@
+/* Mapping Interface Styles */
+.mapping-container {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+/* Fullscreen Mapping Interface */
+.mapping-container.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: #f8f9fa;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+.mapping-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.current-instruction h3 {
+    color: #333;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.progress-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+}
+
+.progress-info span {
+    color: #666;
+    font-weight: 600;
+}
+
+#tap-counter {
+    color: #4CAF50;
+}
+
+#hand-indicator {
+    color: #2196F3;
+}
+
+/* Finger Legend */
+.finger-legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.finger-item {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 2px solid #ddd;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.finger-item[data-finger="thumb"] { border-color: #FF6B6B; background: rgba(255, 107, 107, 0.1); }
+.finger-item[data-finger="index"] { border-color: #4ECDC4; background: rgba(78, 205, 196, 0.1); }
+.finger-item[data-finger="middle"] { border-color: #45B7D1; background: rgba(69, 183, 209, 0.1); }
+.finger-item[data-finger="ring"] { border-color: #96CEB4; background: rgba(150, 206, 180, 0.1); }
+.finger-item[data-finger="pinky"] { border-color: #FFEAA7; background: rgba(255, 234, 167, 0.1); }
+
+.finger-item.active {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Tap Canvas */
+.tap-canvas-container {
+    position: relative;
+    margin: 30px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.tap-canvas {
+    border: 3px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    cursor: crosshair;
+    width: 100%;
+    height: 400px;
+    max-width: 1000px;
+    min-height: 400px;
+    display: block;
+}
+
+/* Fullscreen Canvas */
+.fullscreen-canvas-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.fullscreen-canvas {
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    cursor: crosshair;
+    display: block;
+    border: none;
+    border-radius: 0;
+}
+
+/* Floating Controls */
+.floating-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    min-width: 250px;
+    max-width: 350px;
+    z-index: 1001;
+    transition: all 0.3s ease;
+}
+
+.control-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.toggle-controls-btn {
+    background: none;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+.toggle-controls-btn:hover {
+    border-color: #4CAF50;
+    transform: rotate(90deg);
+}
+
+.expandable-controls {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.expandable-controls.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.canvas-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    border-radius: 0;
+}
+
+.tap-indicator {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #333;
+    background: rgba(255, 255, 255, 0.8);
+    margin-left: -6px;
+    margin-top: -6px;
+    font-size: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    animation: tapPop 0.3s ease-out;
+    z-index: 10;
+}
+
+@keyframes tapPop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.suggested-key {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #4CAF50;
+    border-radius: 6px;
+    background: rgba(76, 175, 80, 0.2);
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #2E7D32;
+}
+
+/* Finger colors for tap indicators */
+.tap-indicator.finger-thumb { background: rgba(255, 107, 107, 0.8); border-color: #FF6B6B; }
+.tap-indicator.finger-index { background: rgba(78, 205, 196, 0.8); border-color: #4ECDC4; }
+.tap-indicator.finger-middle { background: rgba(69, 183, 209, 0.8); border-color: #45B7D1; }
+.tap-indicator.finger-ring { background: rgba(150, 206, 180, 0.8); border-color: #96CEB4; }
+.tap-indicator.finger-pinky { background: rgba(255, 234, 167, 0.8); border-color: #FFEAA7; }
+
+/* Suggested key colors */
+.suggested-key.finger-thumb { border-color: #FF6B6B; background: rgba(255, 107, 107, 0.3); }
+.suggested-key.finger-index { border-color: #4ECDC4; background: rgba(78, 205, 196, 0.3); }
+.suggested-key.finger-middle { border-color: #45B7D1; background: rgba(69, 183, 209, 0.3); }
+.suggested-key.finger-ring { border-color: #96CEB4; background: rgba(150, 206, 180, 0.3); }
+.suggested-key.finger-pinky { border-color: #FFEAA7; background: rgba(255, 234, 167, 0.3); }
+
+/* Tap indicator */
+.grid-key::after {
+    content: attr(data-taps);
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #333;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.grid-key[data-taps]:not([data-taps=""]):not([data-taps="0"])::after {
+    opacity: 1;
+}
+
+/* Finger and Hand Selectors */
+.finger-selector, .hand-selector {
+    margin: 15px 0;
+    text-align: left;
+}
+
+.finger-selector h4, .hand-selector h4 {
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.finger-buttons, .hand-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.finger-btn, .hand-btn {
+    padding: 8px 10px;
+    border: 2px solid #ddd;
+    border-radius: 20px;
+    background: white;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 36px;
+    min-width: 36px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Compact Action Controls */
+.action-controls {
+    margin-top: 15px;
+}
+
+.action-row {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 3px;
+}
+
+.action-row:last-child {
+    margin-bottom: 0;
+}
+
+.control-btn {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 18px;
+    background: white;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    flex: 1;
+    min-width: 60px;
+}
+
+.control-btn:hover {
+    transform: translateY(-2px);
+}
+
+.clear-btn { border-color: #FF9800; }
+.clear-btn:hover, .clear-btn.active { background: #FF9800; color: white; }
+
+.reset-btn { border-color: #F44336; }
+.reset-btn:hover, .reset-btn.active { background: #F44336; color: white; }
+
+.finish-btn { border-color: #4CAF50; }
+.finish-btn:hover, .finish-btn.active { background: #4CAF50; color: white; }
+
+.finger-btn:hover, .hand-btn:hover {
+    border-color: #999;
+    transform: translateY(-2px);
+}
+
+.finger-btn.active, .hand-btn.active {
+    border-color: #4CAF50;
+    background: #4CAF50;
+    color: white;
+    transform: scale(1.05);
+}
+
+.finger-btn[data-finger="thumb"] { border-color: #FF6B6B; }
+.finger-btn[data-finger="thumb"].active { background: #FF6B6B; border-color: #FF6B6B; }
+.finger-btn[data-finger="index"] { border-color: #4ECDC4; }
+.finger-btn[data-finger="index"].active { background: #4ECDC4; border-color: #4ECDC4; }
+.finger-btn[data-finger="middle"] { border-color: #45B7D1; }
+.finger-btn[data-finger="middle"].active { background: #45B7D1; border-color: #45B7D1; }
+.finger-btn[data-finger="ring"] { border-color: #96CEB4; }
+.finger-btn[data-finger="ring"].active { background: #96CEB4; border-color: #96CEB4; }
+.finger-btn[data-finger="pinky"] { border-color: #FFEAA7; }
+.finger-btn[data-finger="pinky"].active { background: #FFEAA7; border-color: #FFEAA7; color: #333; }
+
+.hand-btn[data-hand="left"] { border-color: #9B59B6; }
+.hand-btn[data-hand="left"].active { background: #9B59B6; border-color: #9B59B6; }
+.hand-btn[data-hand="right"] { border-color: #E67E22; }
+.hand-btn[data-hand="right"].active { background: #E67E22; border-color: #E67E22; }
+
+/* Tap Visibility Control */
+.tap-visibility-control {
+    margin: 15px 0;
+    text-align: left;
+}
+
+.tap-visibility-control h4 {
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.visibility-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.visibility-btn {
+    padding: 6px 12px;
+    border: 2px solid #ddd;
+    border-radius: 15px;
+    background: white;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    flex: 1;
+    min-width: 50px;
+}
+
+.visibility-btn:hover {
+    border-color: #999;
+    transform: translateY(-1px);
+}
+
+.visibility-btn.active {
+    border-color: #4CAF50;
+    background: #4CAF50;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Key Visibility Control */
+.key-visibility-control {
+    margin: 15px 0;
+    text-align: left;
+}
+
+.key-visibility-control h4 {
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Mapping Controls */
+.mapping-controls {
+    text-align: center;
+    margin-top: 30px;
+}
+
+/* Results and Export */
+.results-container {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.results-container h2 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.layout-preview {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.export-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.export-section h3 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.export-output {
+    margin-top: 20px;
+}
+
+.export-output h4 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#export-code {
+    width: 100%;
+    height: 300px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    resize: vertical;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .tap-canvas {
+        height: 350px;
+        min-height: 350px;
+    }
+    
+    .tap-indicator {
+        width: 10px;
+        height: 10px;
+        margin-left: -5px;
+        margin-top: -5px;
+        border-width: 1px;
+        font-size: 0.4rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .mapping-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .finger-legend {
+        justify-content: center;
+    }
+    
+    .tap-canvas-container {
+        padding: 15px;
+    }
+    
+    .tap-canvas {
+        height: 300px;
+        min-height: 300px;
+    }
+    
+    .tap-indicator {
+        width: 8px;
+        height: 8px;
+        margin-left: -4px;
+        margin-top: -4px;
+        border-width: 1px;
+        font-size: 0.3rem;
+    }
+    
+    .current-instruction h3 {
+        font-size: 1.2rem;
+    }
+    
+    .progress-info {
+        justify-content: center;
+    }
+    
+    /* Mobile Fullscreen Adjustments */
+    .floating-controls {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+    }
+    
+    .control-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .toggle-controls-btn {
+        align-self: flex-end;
+        margin: 5px 0 0 0;
+    }
+    
+    .finger-buttons, .hand-buttons {
+        gap: 4px;
+    }
+    
+    .finger-btn, .hand-btn {
+        min-width: 32px;
+        min-height: 32px;
+        padding: 6px 8px;
+        font-size: 0.7rem;
+    }
+    
+    .action-controls {
+        gap: 6px;
+    }
+    
+    .control-btn {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tap-canvas {
+        height: 250px;
+        min-height: 250px;
+    }
+    
+    .tap-indicator {
+        width: 6px;
+        height: 6px;
+        margin-left: -3px;
+        margin-top: -3px;
+        border-width: 1px;
+        font-size: 0.3rem;
+    }
+    
+    .suggested-key {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .finger-item {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+}
+
+/* Key Creation Panel */
+.key-panel {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #1e1e1e;
+    border: 1px solid #3c3c3c;
+    border-radius: 8px;
+    padding: 12px;
+    color: #cccccc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 280px;
+    max-width: 280px;
+    z-index: 1001;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.key-panel-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 10px;
+    min-height: 24px;
+}
+
+.key-panel-header h3 {
+    margin: 0;
+    color: #569cd6;
+    font-size: 16px;
+}
+
+.key-panel .toggle-btn {
+    background: none;
+    border: 1px solid #61dafb;
+    color: #61dafb;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.key-panel .toggle-btn:hover {
+    background: #61dafb;
+    color: #282c34;
+}
+
+.key-panel.collapsed .key-panel-content {
+    display: none;
+}
+
+.key-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#createKeyBtn {
+    background: #61dafb;
+    color: #282c34;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+#createKeyBtn:hover {
+    background: #21a9c7;
+}
+
+#createKeyBtn:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+.key-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.click-counter, .position-display {
+    margin-bottom: 5px;
+}
+
+.rotation-control {
+    margin: 10px 0;
+}
+
+.rotation-control label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 11px;
+}
+
+#rotationSlider {
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.key-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.key-actions button {
+    flex: 1;
+    padding: 6px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.key-actions button:first-child {
+    background: #4caf50;
+    color: white;
+}
+
+.key-actions button:last-child {
+    background: #f44336;
+    color: white;
+}
+
+/* Key visualization on canvas */
+.canvas-key {
+    position: absolute;
+    width: 40px; /* 1u approximation */
+    height: 40px;
+    background: rgba(97, 218, 251, 0.3);
+    border: 2px solid #61dafb;
+    border-radius: 4px;
+    pointer-events: none;
+    transform-origin: center;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #61dafb;
+    font-size: 14px;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.canvas-key.preview {
+    background: rgba(255, 193, 7, 0.3);
+    border-color: #ffc107;
+    animation: pulse 1s infinite;
+}
+
+.canvas-key {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.canvas-key.preview {
+    font-size: 16px;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Key creation tap indicator */
+.tap-indicator.finger-key-creation {
+    background: rgba(255, 193, 7, 0.8);
+    border-color: #ffc107;
+}
+
+/* Key-specific tap indicators */
+.tap-indicator[class*="finger-key-"] {
+    background: rgba(97, 218, 251, 0.8);
+    border-color: #61dafb;
+}
+
+/* Key workflow UI */
+.key-progress {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+    font-size: 0.75rem;
+}
+
+.key-navigation {
+    display: flex;
+    gap: 5px;
+}
+
+.key-navigation button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #61dafb;
+    color: #61dafb;
+    border-radius: 4px;
+    width: 50px;
+    height: 40px;
+    cursor: pointer;
+    font-size: 24px;
+    transition: all 0.2s;
+}
+
+.key-navigation button:hover:not(:disabled) {
+    background: #61dafb;
+    color: #282c34;
+}
+
+.key-navigation button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.current-key-info {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+}
+
+.key-name {
+    font-weight: bold;
+    color: #569cd6;
+    margin-bottom: 3px;
+}
+
+/* Mode selector */
+.mode-selector {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 3px;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #3c3c3c;
+    background: #2d2d30;
+    color: #cccccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.mode-btn:hover {
+    background: #3c3c3c;
+    border-color: #569cd6;
+}
+
+.mode-btn.active {
+    background: #007acc;
+    color: #ffffff;
+    border-color: #007acc;
+}
+
+/* Free mapping info */
+.free-mapping-info {
+    background: #252526;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    line-height: 1.3;
+    color: #cccccc;
+    border: 1px solid #3c3c3c;
+}
+
+/* Combined finger mapping controls in left panel */
+.finger-mapping-controls {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.finger-mapping-controls .finger-selector,
+.finger-mapping-controls .hand-selector,
+.finger-mapping-controls .tap-visibility-control,
+.finger-mapping-controls .key-visibility-control {
+    margin: 8px 0;
+}
+
+.finger-mapping-controls h4 {
+    margin-bottom: 4px;
+    color: #61dafb;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.finger-mapping-controls .finger-buttons,
+.finger-mapping-controls .hand-buttons,
+.finger-mapping-controls .visibility-buttons {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+}
+
+.finger-mapping-controls .finger-btn,
+.finger-mapping-controls .hand-btn,
+.finger-mapping-controls .visibility-btn {
+    padding: 4px 6px;
+    border: 1px solid #61dafb;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #61dafb;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.7rem;
+    flex: 1;
+    min-width: 28px;
+    text-align: center;
+}
+
+.finger-mapping-controls .finger-btn:hover,
+.finger-mapping-controls .hand-btn:hover,
+.finger-mapping-controls .visibility-btn:hover {
+    background: #3c3c3c;
+    border-color: #569cd6;
+    color: #ffffff;
+}
+
+.finger-mapping-controls .finger-btn.active,
+.finger-mapping-controls .hand-btn.active,
+.finger-mapping-controls .visibility-btn.active {
+    background: #61dafb;
+    color: #282c34;
+    transform: scale(1.05);
+}
+
+.finger-mapping-controls .action-controls {
+    margin-top: 10px;
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+}
+
+.finger-mapping-controls .control-btn {
+    padding: 5px 8px;
+    border: 1px solid #61dafb;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #61dafb;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.7rem;
+    flex: 1;
+    min-width: 50px;
+    text-align: center;
+}
+
+.finger-mapping-controls .control-btn:hover {
+    transform: translateY(-2px);
+}
+
+.finger-mapping-controls .clear-btn {
+    border-color: #FF9800;
+    color: #FF9800;
+}
+.finger-mapping-controls .clear-btn:hover,
+.finger-mapping-controls .clear-btn.active {
+    background: #FF9800;
+    color: white;
+}
+
+.finger-mapping-controls .reset-btn {
+    border-color: #F44336;
+    color: #F44336;
+}
+.finger-mapping-controls .reset-btn:hover,
+.finger-mapping-controls .reset-btn.active {
+    background: #F44336;
+    color: white;
+}
+
+.finger-mapping-controls .export-btn {
+    border-color: #4ec9b0;
+    color: #4ec9b0;
+}
+.finger-mapping-controls .export-btn:hover,
+.finger-mapping-controls .export-btn.active {
+    background: #4ec9b0;
+    color: #1e1e1e;
+}
+
+.finger-mapping-controls .fullscreen-btn {
+    border-color: #c586c0;
+    color: #c586c0;
+}
+.finger-mapping-controls .fullscreen-btn:hover,
+.finger-mapping-controls .fullscreen-btn.active {
+    background: #c586c0;
+    color: #1e1e1e;
+}
+
+/* Export Options */
+.export-options {
+    margin-top: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(97, 218, 251, 0.3);
+}
+
+.export-options h4 {
+    margin: 0 0 6px 0;
+    color: #61dafb;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.export-buttons {
+    display: flex;
+    gap: 3px;
+}
+
+.export-format-btn {
+    flex: 1;
+    padding: 5px 6px;
+    border: 1px solid #4CAF50;
+    border-radius: 6px;
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.export-format-btn:hover {
+    background: #4CAF50;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Status header styling */
+.status-header {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(40, 44, 52, 0.95);
+    border: 2px solid #61dafb;
+    border-radius: 12px;
+    padding: 15px;
+    color: white;
+    font-family: Arial, sans-serif;
+    min-width: 280px;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.status-header .current-instruction h3 {
+    margin: 0 0 8px 0;
+    color: #61dafb;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.status-header .progress-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.status-header .progress-info span {
+    color: #ccc;
+    font-weight: 600;
+}
+
+.status-header #tap-counter {
+    color: #4CAF50;
+}
+
+.status-header #hand-indicator {
+    color: #2196F3;
+}
+
+/* Action row layout for multi-row buttons */
+.key-actions .action-row {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 3px;
+}
+
+.key-actions .action-row:last-child {
+    margin-bottom: 0;
+}
+
+/* VS Code Dark Theme Color Updates */
+.current-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: #569cd6;
+}
+
+.current-status span {
+    font-size: 0.75rem;
+    color: #cccccc;
+}
+
+.current-status span:first-child {
+    color: #569cd6;
+}
+
+.current-status span:last-child {
+    color: #4ec9b0;
+}
+
+/* Update general panel sections */
+.finger-mapping-controls .finger-selector,
+.finger-mapping-controls .hand-selector,
+.finger-mapping-controls .tap-visibility-control,
+.finger-mapping-controls .key-visibility-control {
+    background: #252526;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 6px;
+}
+
+/* Update section backgrounds */
+.key-creation-info,
+.key-workflow-controls {
+    background: #252526 !important;
+    border: 1px solid #3c3c3c !important;
+}
+
+/* Update text colors */
+.key-creation-info,
+.key-workflow-controls,
+.free-mapping-info {
+    color: #cccccc !important;
+}
+
+/* Key info display updates */
+.key-info {
+    background: #252526 !important;
+    border: 1px solid #3c3c3c !important;
+    color: #cccccc !important;
+}
+
+/* Update remaining blue accents to VS Code blue */
+.key-panel-header h3,
+.finger-mapping-controls h4,
+.current-status span:first-child {
+    color: #569cd6 !important;
+}
+
+/* Integrated key progress section */
+.key-progress-section {
+    background: #252526;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 6px;
+}
+
+.key-progress-section h4 {
+    margin: 0 0 4px 0;
+    color: #569cd6;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.key-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.key-navigation button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #569cd6;
+    color: #569cd6;
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 32px;
+}
+
+.key-navigation button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: #3c3c3c;
+    color: #666;
+}
+
+.key-navigation button:hover:not(:disabled) {
+    background: #3c3c3c;
+    border-color: #569cd6;
+    color: #ffffff;
+}
+
+.key-navigation span {
+    color: #cccccc;
+    font-size: 0.7rem;
+    min-width: 40px;
+    text-align: center;
+}
+
+.current-key-info {
+    margin-bottom: 6px;
+}
+
+.key-name {
+    font-weight: bold;
+    color: #569cd6;
+    margin-bottom: 3px;
+    font-size: 0.7rem;
+}
+
+.key-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: #cccccc;
+}
+
+.rotation-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+}
+
+.rotation-control input[type="range"] {
+    flex: 1;
+    height: 20px;
+}
+
+.rotation-control label {
+    color: #cccccc;
+    min-width: 50px;
+}
+
+.rotation-control span {
+    color: #4ec9b0;
+    min-width: 30px;
+    font-weight: 600;
+}
+
+/* Key management section */
+.key-management {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.key-actions-row {
+    display: flex;
+    gap: 3px;
+}
+
+.key-mgmt-btn {
+    flex: 1;
+    padding: 5px 8px;
+    border: 1px solid #569cd6;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #569cd6;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.key-mgmt-btn:hover {
+    background: #3c3c3c;
+    border-color: #569cd6;
+    color: #ffffff;
+}
+
+.key-mgmt-btn.add-key-btn {
+    border-color: #4ec9b0;
+    color: #4ec9b0;
+}
+
+.key-mgmt-btn.add-key-btn:hover {
+    background: rgba(78, 201, 176, 0.2);
+    border-color: #4ec9b0;
+    color: #4ec9b0;
+}
+
+.key-mgmt-btn.remove-key-btn {
+    border-color: #f48771;
+    color: #f48771;
+}
+
+.key-mgmt-btn.remove-key-btn:hover {
+    background: rgba(244, 135, 113, 0.2);
+    border-color: #f48771;
+    color: #f48771;
+}
+
+.key-mgmt-btn.reset-key-btn {
+    border-color: #ce9178;
+    color: #ce9178;
+}
+
+.key-mgmt-btn.reset-key-btn:hover {
+    background: rgba(206, 145, 120, 0.2);
+    border-color: #ce9178;
+    color: #ce9178;
+}
+
+/* Update canvas key colors from cyan to vibrant highlights */
+.canvas-key {
+    background: rgba(255, 193, 7, 0.3) !important;
+    border-color: #ffc107 !important;
+    color: #ffc107 !important;
+    font-weight: bold !important;
+}
+
+.canvas-key.preview {
+    background: rgba(76, 175, 80, 0.3) !important;
+    border-color: #4caf50 !important;
+    color: #4caf50 !important;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.6) !important;
+    font-weight: bold !important;
+}
+
+/* Update key elements in exports and displays */
+.suggested-key {
+    background: rgba(255, 152, 0, 0.3) !important;
+    border-color: #ff9800 !important;
+    color: #ff9800 !important;
+    font-weight: bold !important;
+}
+
+/* Override any existing canvas key styles */
+#canvas-overlay .canvas-key {
+    background: rgba(255, 193, 7, 0.3) !important;
+    border: 2px solid #ffc107 !important;
+    color: #ffc107 !important;
+}
+
+#canvas-overlay .canvas-key.preview {
+    background: rgba(76, 175, 80, 0.3) !important;
+    border: 2px solid #4caf50 !important;
+    color: #4caf50 !important;
+    box-shadow: 0 0 12px rgba(76, 175, 80, 0.8) !important;
+}

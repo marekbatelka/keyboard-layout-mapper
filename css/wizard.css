@@ -1,0 +1,83 @@
+/* Wizard Styles */
+.wizard-container {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.wizard-step {
+    text-align: center;
+}
+
+.wizard-step h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.wizard-step p {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.config-section {
+    margin: 20px 0;
+    text-align: left;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.config-section label {
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.config-section input,
+.config-section select {
+    width: 100%;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+}
+
+.config-section input:focus,
+.config-section select:focus {
+    background: white;
+    border-color: #4CAF50;
+}
+
+/* Wizard animations */
+.wizard-step {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive wizard */
+@media (max-width: 768px) {
+    .wizard-container {
+        padding: 20px;
+        margin: 0 -5px 20px -5px;
+    }
+    
+    .wizard-step h2 {
+        font-size: 1.5rem;
+    }
+    
+    .config-section {
+        max-width: 100%;
+    }
+}

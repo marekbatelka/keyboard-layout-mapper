@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Keyboard Layout Designer</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/wizard.css">
+    <link rel="stylesheet" href="css/mapping.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>Keyboard Layout Designer</h1>
+            <p>Create custom keyboard layouts with ergonomic finger mapping</p>
+        </header>
+
+        <!-- Configuration Wizard -->
+        <div id="wizard-container" class="wizard-container hidden">
+            <div class="wizard-step" id="step-config">
+                <h2>Create Your Keyboard Layout</h2>
+                <p>Set the number of keys you want to create and start designing your custom layout.</p>
+                <div class="config-section">
+                    <label for="key-count-input">Number of Keys to Create:</label>
+                    <input type="number" id="key-count-input" min="1" max="100" value="10">
+                </div>
+                <div class="config-section">
+                    <label for="mapping-order">Layout Type:</label>
+                    <select id="mapping-order">
+                        <option value="custom">Custom Layout</option>
+                        <option value="ergonomic">Ergonomic Mapping</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="startMapping()">Start Creating Keys</button>
+            </div>
+        </div>
+
+        <!-- Fullscreen Finger Mapping Interface -->
+        <div id="mapping-container" class="mapping-container fullscreen">
+            <!-- Fullscreen Canvas -->
+            <div class="fullscreen-canvas-container">
+                <canvas id="tap-canvas" class="fullscreen-canvas"></canvas>
+                <div class="canvas-overlay" id="canvas-overlay">
+                    <!-- Tap indicators will be added here -->
+                </div>
+                
+                <!-- Key Creation Panel -->
+                <div class="key-panel" id="keyPanel">
+                    <div class="key-panel-header">
+                        <button class="toggle-btn" onclick="toggleKeyPanel()">−</button>
+                    </div>
+                    <div class="key-panel-content">
+                        <div class="mode-selector">
+                            <button id="startKeyModeBtn" onclick="startKeyCreationMode()" class="mode-btn">Create Keys</button>
+                            <button id="pauseKeyModeBtn" onclick="pauseKeyCreationMode()" class="mode-btn" style="display: none;">Free Mapping</button>
+                        </div>
+
+                        <div class="free-mapping-info" id="freeMappingInfo">
+                            <div class="current-status">
+                                <span id="hand-indicator">Left Thumb</span>
+                                <span id="tap-counter">0 taps</span>
+                            </div>
+                        </div>
+
+                        <!-- Key Creation Progress Section -->
+                        <div class="key-progress-section" id="keyProgressSection" style="display: none;">
+                            <div class="key-management">
+                                <div class="key-actions-row">
+                                    <button class="key-mgmt-btn add-key-btn" onclick="addNewKey()" title="Add New Key">+ Add Key</button>
+                                    <button class="key-mgmt-btn remove-key-btn" onclick="removeCurrentKey()" title="Remove Current Key">− Remove</button>
+                                </div>
+                                <div class="key-actions-row">
+                                    <button class="key-mgmt-btn reset-key-btn" onclick="resetCurrentKey()" title="Reset Current Key">Reset Key</button>
+                                </div>
+                                <div class="key-navigation">
+                                    <button class="key-mgmt-btn nav-btn" id="prevKeyBtn" onclick="previousKey()" title="Previous Key">←</button>
+                                    <span id="keyIndex">1 / 1</span>
+                                    <button class="key-mgmt-btn nav-btn" id="nextKeyBtn" onclick="nextKey()" title="Next Key">→</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Finger Mapping Controls -->
+                        <div class="finger-mapping-controls" id="fingerMappingControls">
+                            <!-- Finger Selector -->
+                            <div class="finger-selector">
+                                <h4>Finger:</h4>
+                                <div class="finger-buttons">
+                                    <button class="finger-btn" data-finger="thumb" onclick="switchFinger('thumb')">T</button>
+                                    <button class="finger-btn" data-finger="index" onclick="switchFinger('index')">I</button>
+                                    <button class="finger-btn" data-finger="middle" onclick="switchFinger('middle')">M</button>
+                                    <button class="finger-btn" data-finger="ring" onclick="switchFinger('ring')">R</button>
+                                    <button class="finger-btn" data-finger="pinky" onclick="switchFinger('pinky')">P</button>
+                                </div>
+                            </div>
+
+                            <!-- Hand Selector -->
+                            <div class="hand-selector">
+                                <h4>Hand:</h4>
+                                <div class="hand-buttons">
+                                    <button class="hand-btn" data-hand="left" onclick="switchHand('left')">L</button>
+                                    <button class="hand-btn" data-hand="right" onclick="switchHand('right')">R</button>
+                                </div>
+                            </div>
+
+                            <!-- Tap Visibility Control -->
+                            <div class="tap-visibility-control">
+                                <h4>Tap Indicators:</h4>
+                                <div class="visibility-buttons">
+                                    <button class="visibility-btn active" id="showTapsBtn" onclick="toggleTapVisibility(true)">Show</button>
+                                    <button class="visibility-btn" id="hideTapsBtn" onclick="toggleTapVisibility(false)">Hide</button>
+                                </div>
+                            </div>
+
+                            <!-- Key Visibility Control -->
+                            <div class="key-visibility-control">
+                                <h4>Defined Keys:</h4>
+                                <div class="visibility-buttons">
+                                    <button class="visibility-btn active" id="showKeysBtn" onclick="toggleKeyVisibility(true)">Show</button>
+                                    <button class="visibility-btn" id="hideKeysBtn" onclick="toggleKeyVisibility(false)">Hide</button>
+                                </div>
+                            </div>
+
+                            <!-- Action Controls -->
+                            <div class="action-controls">
+                                <div class="action-row" id="freeMapActions">
+                                    <button class="control-btn clear-btn" onclick="clearCurrentFinger()">Clear</button>
+                                    <button class="control-btn reset-btn" onclick="resetMapping()">Reset</button>
+                                    <button class="control-btn export-btn" onclick="exportPNG()">PNG</button>
+                                </div>
+                                <div class="action-row" id="keyCreateActions" style="display: none;">
+                                    <button class="control-btn clear-btn" onclick="clearCurrentKey()">Clear Key</button>
+                                    <button class="control-btn export-btn" onclick="exportPNG()">PNG</button>
+                                </div>
+                                <div class="action-row">
+                                    <button class="control-btn fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+
+            </div>
+        </div>
+
+        <!-- Results and Export -->
+        <div id="results-container" class="results-container hidden">
+            <h2>Your Keyboard Layout</h2>
+            <div class="layout-preview" id="layout-preview">
+                <!-- Layout visualization will be generated -->
+            </div>
+            
+
+
+            <div class="export-output hidden" id="export-output">
+                <h4>Generated Code:</h4>
+                <textarea id="export-code" readonly></textarea>
+                <button class="btn-copy" onclick="copyToClipboard()">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/wizard.js"></script>
+    <script src="js/mapping.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/touch-handler.js"></script>
+</body>
+</html>
