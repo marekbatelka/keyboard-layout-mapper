@@ -35,7 +35,7 @@ A tablet-optimized web application for creating custom keyboard layouts with int
 - **Professional UI**: Modern, clean interface design
 
 ### 📤 Export Formats
-- **PNG**: IMage of canvas
+- **PNG**: Image of canvas
 
 ## 📱 GitHub Pages Deployment
 
@@ -47,7 +47,7 @@ This project is configured for automatic GitHub Pages deployment:
    - Go to Settings > Pages
    - Source: "GitHub Actions"
 3. **Push to main branch** - site deploys automatically
-4. **Access your live site** at: `https://your-username.github.io/kbdlayout`
+4. **Access your live site** at: `https://your-username.github.io/keyboard-layout-mapper`
 
 ### Manual Setup
 If you prefer manual deployment:
