@@ -1,15 +1,15 @@
 # Keyboard Layout Designer
 
-[![Deploy to GitHub Pages](https://github.com/your-username/kbdlayout/actions/workflows/deploy.yml/badge.svg)](https://github.com/your-username/kbdlayout/actions/workflows/deploy.yml)
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://your-username.github.io/kbdlayout)
+[![Deploy to GitHub Pages](https://github.com/marekbatelka/keyboard-layout-mapper/actions/workflows/deploy.yml/badge.svg)](https://github.com/marekbatelka/keyboard-layout-mapper/actions/workflows/deploy.yml)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://marekbatelka.github.io/keyboard-layout-mapper)
 
-A web application for creating custom keyboard layouts with ergonomic finger mapping functionality. This tool helps users map optimal key positions by analyzing finger tap patterns and exports layouts in various formats including Ergogen.
+A tablet-optimized web application for creating custom keyboard layouts with interactive key positioning. Design your keyboard layout by tapping on a fullscreen canvas to place keys exactly where you want them.
 
 > **🎯 Optimized for tablets** - Best experienced on iPad, Android tablets, or touch devices via the live demo link.
 
 ## 🚀 Live Demo
 
-**Try it live on your tablet:** [https://your-username.github.io/kbdlayout](https://your-username.github.io/kbdlayout)
+**Try it live on your tablet:** [https://marekbatelka.github.io/keyboard-layout-mapper](https://marekbatelka.github.io/keyboard-layout-mapper)
 
 ## Features
 
