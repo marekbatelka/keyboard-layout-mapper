@@ -786,6 +786,16 @@
     z-index: 100;
 }
 
+.canvas-key.highlighted {
+    background: rgba(76, 175, 80, 0.8) !important;
+    border: 4px solid #4caf50 !important;
+    border-color: #4caf50 !important;
+    box-shadow: 0 0 30px rgba(76, 175, 80, 1) !important;
+    transform: scale(1.1) !important;
+    z-index: 200;
+    animation: none !important;
+}
+
 .canvas-key {
     font-size: 16px;
     font-weight: bold;
@@ -842,6 +852,9 @@
     cursor: pointer;
     font-size: 24px;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .key-navigation button:hover:not(:disabled) {
@@ -946,6 +959,197 @@
     transform: scale(0.95);
 }
 
+/* Instructions toggle button */
+.instructions-icon-btn {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 10000;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(78, 201, 176, 0.9);
+    color: white;
+    border: 2px solid #4ec9b0;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.instructions-icon-btn:hover {
+    background: rgba(78, 201, 176, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.instructions-icon-btn:active {
+    transform: scale(0.95);
+}
+
+.calibrate-icon-btn {
+    position: fixed;
+    top: 140px;
+    right: 20px;
+    z-index: 10000;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 100, 100, 0.9);
+    color: white;
+    border: 2px solid #ff6464;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.calibrate-icon-btn:hover {
+    background: rgba(255, 100, 100, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.calibrate-icon-btn:active {
+    transform: scale(0.95);
+}
+
+.square-icon-btn {
+    position: fixed;
+    top: 200px;
+    right: 20px;
+    z-index: 10000;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 100, 100, 0.9);
+    color: white;
+    border: 2px solid #ff6464;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.square-icon-btn:hover {
+    background: rgba(255, 100, 100, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.square-icon-btn:active {
+    transform: scale(0.95);
+}
+
+.hand-icon-btn {
+    position: fixed;
+    top: 260px;
+    right: 20px;
+    z-index: 10000;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(86, 156, 214, 0.9);
+    color: white;
+    border: 2px solid #569cd6;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.hand-icon-btn:hover {
+    background: rgba(86, 156, 214, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.hand-icon-btn:active {
+    transform: scale(0.95);
+}
+
+/* Toggle Taps Icon Button */
+.taps-icon-btn {
+    position: fixed;
+    top: 320px;
+    right: 20px;
+    z-index: 10000;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 193, 7, 0.9);
+    color: white;
+    border: 2px solid #ffc107;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.taps-icon-btn:hover {
+    background: rgba(255, 193, 7, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.taps-icon-btn:active {
+    transform: scale(0.95);
+}
+
+.taps-icon-btn.hidden-state {
+    opacity: 0.5;
+}
+
+/* Toggle Play Arrows Icon Button */
+.play-arrows-icon-btn {
+    position: fixed;
+    top: 380px;
+    right: 20px;
+    z-index: 10000;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    border: 2px solid #4caf50;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.play-arrows-icon-btn:hover {
+    background: rgba(76, 175, 80, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.play-arrows-icon-btn:active {
+    transform: scale(0.95);
+}
+
+.play-arrows-icon-btn.hidden-state {
+    opacity: 0.5;
+}
+
 /* Move mode options */
 .move-mode-options {
     margin-bottom: 10px;
@@ -1026,6 +1230,64 @@
 
 .export-action-btn:active {
     transform: translateY(0);
+}
+
+/* Calibrate mode options */
+.calibrate-mode-options {
+    margin-bottom: 10px;
+    background: #252526;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #3c3c3c;
+}
+
+.calibrate-controls-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.calibrate-controls-panel .calibration-dimension {
+    margin-bottom: 12px;
+}
+
+.calibrate-controls-panel label {
+    display: block;
+    color: #cccccc;
+    margin-bottom: 4px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.calibrate-controls-panel input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    background: #1e1e1e;
+    border: 2px solid #3c3c3c;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.calibrate-controls-panel input[type="number"]:focus {
+    outline: none;
+    border-color: #ff6464;
+}
+
+.calibration-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Play Mode Options */
+.play-mode-options {
+    margin-top: 15px;
+}
+
+.play-mode-panel {
+    display: flex;
+    flex-direction: column;
 }
 
 /* Free mapping info */
@@ -1558,3 +1820,182 @@
     color: #4caf50 !important;
     box-shadow: 0 0 12px rgba(76, 175, 80, 0.8) !important;
 }
+
+/* Calibration overlay */
+#calibration-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 20000;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.calibration-panel {
+    background: #2d2d2d;
+    border: 2px solid #ff6464;
+    border-radius: 8px;
+    padding: 20px 30px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.calibration-panel h3 {
+    color: #ff6464;
+    margin: 0 0 15px 0;
+    font-size: 24px;
+}
+
+.calibration-panel p {
+    color: #cccccc;
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.calibration-controls {
+    margin: 20px 0;
+}
+
+.calibration-dimension {
+    margin-bottom: 15px;
+}
+
+.calibration-controls label {
+    display: block;
+    color: #cccccc;
+    margin-bottom: 6px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.calibration-controls input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    background: #1e1e1e;
+    border: 2px solid #3c3c3c;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 18px;
+    box-sizing: border-box;
+}
+
+.calibration-controls input[type="number"]:focus {
+    outline: none;
+    border-color: #ff6464;
+}
+
+.calibration-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.calibration-buttons button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #ff6464;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #ff4444;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 100, 100, 0.4);
+}
+
+.btn-secondary {
+    background: #569cd6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4a8ac4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(86, 156, 214, 0.4);
+}
+
+.btn-cancel {
+    background: #3c3c3c;
+    color: #cccccc;
+}
+
+.btn-cancel:hover {
+    background: #4c4c4c;
+    color: #ffffff;
+}
+
+.calibration-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: #1e1e1e;
+    border-radius: 4px;
+    border: 1px solid #3c3c3c;
+}
+
+.calibration-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.calibration-info span {
+    color: #4ec9b0;
+    font-weight: bold;
+}
+
+/* Play Mode Arrows */
+.play-mode-arrow {
+    position: absolute;
+    height: 3px;
+    background: linear-gradient(to right, rgba(76, 175, 80, 0.9), rgba(76, 175, 80, 0.5));
+    transform-origin: left center;
+    pointer-events: none;
+    z-index: 150;
+}
+
+.play-mode-arrow::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid rgba(76, 175, 80, 0.9);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+}
+
+.play-mode-tap-count {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+

@@ -48,6 +48,30 @@
                 <!-- Fullscreen Button (Top Right) -->
                 <button class="fullscreen-icon-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
                 
+                <!-- Instructions Toggle Button -->
+                <button class="instructions-icon-btn" onclick="toggleInstructions()" title="Toggle Instructions">?</button>
+                
+                <!-- Calibrate Button -->
+                <button class="calibrate-icon-btn" onclick="toggleCalibration()" title="Calibrate Screen">📏</button>
+                
+                <!-- Toggle Calibration Square Button -->
+                <button class="square-icon-btn" onclick="toggleSquare()" title="Toggle Calibration Square">🟥</button>
+                
+                <!-- Hand Toggle Button -->
+                <button class="hand-icon-btn" onclick="toggleHandIcon()" title="Toggle Hand (L/R)">
+                    <span id="handIconText">🤚</span>
+                </button>
+                
+                <!-- Toggle Taps Button -->
+                <button class="taps-icon-btn" onclick="toggleTapsIcon()" title="Toggle Tap Indicators">
+                    <span id="tapsIconText">👆</span>
+                </button>
+                
+                <!-- Toggle Play Arrows Button -->
+                <button class="play-arrows-icon-btn" onclick="togglePlayArrowsIcon()" title="Toggle Play Arrows">
+                    <span id="playArrowsIconText">➡️</span>
+                </button>
+                
                 <!-- Key Creation Panel -->
                 <div class="key-panel" id="keyPanel">
                     <div class="key-panel-header">
@@ -55,9 +79,11 @@
                     </div>
                     <div class="key-panel-content">
                         <div class="mode-selector">
+                            <button id="calibrateMode" onclick="setMode('calibrate')" class="mode-btn">Calibrate</button>
                             <button id="moveMode" onclick="setMode('move')" class="mode-btn">Move</button>
                             <button id="tapMode" onclick="setMode('tap')" class="mode-btn">Tap</button>
                             <button id="keyMode" onclick="setMode('key')" class="mode-btn active">Key</button>
+                            <button id="playMode" onclick="setMode('play')" class="mode-btn">Play</button>
                             <button id="exportMode" onclick="setMode('export')" class="mode-btn">Export</button>
                         </div>
 
@@ -92,6 +118,47 @@
                             </div>
                         </div>
 
+                        <!-- Calibrate Mode Options -->
+                        <div class="calibrate-mode-options" id="calibrateModeOptions" style="display: none;">
+                            <div class="calibrate-controls-panel">
+                                <p style="font-size: 0.9em; color: #cccccc; margin-bottom: 10px;">Measure the red square with a ruler.</p>
+                                <p style="font-size: 0.85em; color: #ffa500; margin-bottom: 10px;"><strong>⚠️ Important:</strong> Calibration differs between fullscreen and windowed mode. Calibrate in the mode you'll use.</p>
+                                <div class="calibration-dimension">
+                                    <label>Horizontal width (cm):</label>
+                                    <input type="number" id="calibration-input-x-panel" value="10" min="5" max="15" step="0.1">
+                                </div>
+                                <div class="calibration-dimension">
+                                    <label>Vertical height (cm):</label>
+                                    <input type="number" id="calibration-input-y-panel" value="10" min="5" max="15" step="0.1">
+                                </div>
+                                <div class="calibration-action-buttons">
+                                    <button class="btn-primary" onclick="applyCalibrationFromPanel()" style="width: 100%; margin-bottom: 8px;">Apply Calibration</button>
+                                    <button class="btn-secondary" onclick="resetCalibrationFromPanel()" style="width: 100%; margin-bottom: 8px;">Reset to Default</button>
+                                    <button class="btn-secondary" onclick="toggleSquare()" style="width: 100%;">
+                                        <span id="squareToggleText">Hide Square</span>
+                                    </button>
+                                </div>
+                                <div class="calibration-info" style="margin-top: 15px;">
+                                    <p style="font-size: 0.85em;">DPI Scale X: <span id="dpi-scale-x-display-panel">1.000</span> | Y: <span id="dpi-scale-y-display-panel">1.000</span></p>
+                                    <p style="font-size: 0.85em;">Effective DPI X: <span id="effective-dpi-x-panel">96.0</span> | Y: <span id="effective-dpi-y-panel">96.0</span></p>
+                                </div>
+                                <p style="font-size: 0.8em; color: #f48771; margin-top: 10px;"><strong>⚠️ Warning:</strong> Calibration resets all keys.</p>
+                            </div>
+                        </div>
+
+                        <!-- Play Mode Options -->
+                        <div class="play-mode-options" id="playModeOptions" style="display: none;">
+                            <div class="play-mode-panel">
+                                <p style="font-size: 0.9em; color: #cccccc; margin-bottom: 10px;">Tap on keys to track where you press them. Arrows show average tap position offset from center.</p>
+                                <div style="margin-top: 15px;">
+                                    <button class="btn-primary" onclick="resetPlayModeTaps()" style="width: 100%; margin-bottom: 8px;">🔄 Reset Tap Data</button>
+                                </div>
+                                <div style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.1); border-radius: 4px; border: 1px solid rgba(76, 175, 80, 0.3);">
+                                    <p style="font-size: 0.85em; color: #4caf50; margin: 0;"><strong>💡 Tip:</strong> Tap multiple times on each key to see your average pressing position.</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="free-mapping-info" id="freeMappingInfo" style="display: none;">
                             <div class="current-status">
                                 <span id="hand-indicator">Left Thumb</span>
@@ -103,11 +170,17 @@
                         <div class="key-progress-section" id="keyProgressSection" style="display: none;">
                             <div class="key-management">
                                 <div class="key-actions-row">
-                                    <button class="key-mgmt-btn add-key-btn" onclick="addNewKey()" title="Add New Key">+ Add Key</button>
-                                    <button class="key-mgmt-btn remove-key-btn" onclick="removeCurrentKey()" title="Remove Current Key">− Remove</button>
+                                    <label style="font-size: 12px; color: #cccccc; margin-bottom: 4px;">Select Key:</label>
+                                    <select id="keySelector" onchange="selectKeyFromDropdown(this.value)" style="width: 100%; padding: 6px; background: #1e1e1e; border: 2px solid #3c3c3c; border-radius: 4px; color: #ffffff; font-size: 13px; margin-bottom: 8px;">
+                                        <option value="0">Key 1</option>
+                                    </select>
+                                </div>
+                                <div class="key-actions-row" style="flex-direction: column; gap: 8px;">
+                                    <button class="key-mgmt-btn add-key-btn" onclick="addNewKey()" title="Add New Key" style="width: 100%; font-size: 14px; padding: 12px;">+ Add Key</button>
+                                    <button class="key-mgmt-btn remove-key-btn" onclick="removeCurrentKey()" title="Remove Current Key" style="width: 100%; font-size: 14px; padding: 12px;">− Remove Key</button>
                                 </div>
                                 <div class="key-actions-row">
-                                    <button class="key-mgmt-btn reset-key-btn" onclick="resetCurrentKey()" title="Reset Current Key">Reset Key</button>
+                                    <button class="key-mgmt-btn reset-key-btn" onclick="resetCurrentKey()" title="Reset Current Key" style="width: 100%; font-size: 14px; padding: 12px;">Reset Key</button>
                                 </div>
                                 <div class="key-actions-row">
                                     <label class="snap-toggle-label">
@@ -115,10 +188,10 @@
                                         <span>Snap to 0.25u Grid</span>
                                     </label>
                                 </div>
-                                <div class="key-navigation">
-                                    <button class="key-mgmt-btn nav-btn" id="prevKeyBtn" onclick="previousKey()" title="Previous Key">←</button>
-                                    <span id="keyIndex">1 / 1</span>
-                                    <button class="key-mgmt-btn nav-btn" id="nextKeyBtn" onclick="nextKey()" title="Next Key">→</button>
+                                <div class="key-navigation" style="display: flex; align-items: center; gap: 8px;">
+                                    <button class="key-mgmt-btn nav-btn" id="prevKeyBtn" onclick="previousKey()" title="Previous Key" style="font-size: 28px; padding: 10px 16px; flex: 1;">◀</button>
+                                    <span id="keyIndex" style="min-width: 50px; text-align: center;">1 / 1</span>
+                                    <button class="key-mgmt-btn nav-btn" id="nextKeyBtn" onclick="nextKey()" title="Next Key" style="font-size: 28px; padding: 10px 16px; flex: 1;">▶</button>
                                 </div>
                             </div>
                         </div>
@@ -134,15 +207,6 @@
                                     <button class="finger-btn" data-finger="middle" onclick="switchFinger('middle')">M</button>
                                     <button class="finger-btn" data-finger="ring" onclick="switchFinger('ring')">R</button>
                                     <button class="finger-btn" data-finger="pinky" onclick="switchFinger('pinky')">P</button>
-                                </div>
-                            </div>
-
-                            <!-- Hand Selector -->
-                            <div class="hand-selector">
-                                <h4>Hand:</h4>
-                                <div class="hand-buttons">
-                                    <button class="hand-btn" data-hand="left" onclick="switchHand('left')">L</button>
-                                    <button class="hand-btn" data-hand="right" onclick="switchHand('right')">R</button>
                                 </div>
                             </div>
 

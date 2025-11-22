@@ -72,7 +72,7 @@ function importKLE() {
         }
         
         // Convert KLE format to our internal key format
-        const ONE_U = 72; // pixels per key unit
+        const ONE_U = window.getScaledOneU ? window.getScaledOneU() : 72; // pixels per key unit (already scaled by DPI)
         const importedKeys = [];
         
         let currentX = 0;
@@ -156,9 +156,11 @@ function importKLE() {
         
         // Clear existing keys and load imported keys
         window.keys = importedKeys;
+        keys = importedKeys; // Update global keys array
         totalKeys = importedKeys.length;
         currentKeyIndex = 0;
         currentKey = importedKeys[0];
+        keyIdCounter = importedKeys.length; // Update counter for next new key
         
         // Redraw all keys on canvas
         const overlay = document.querySelector('.canvas-overlay');
@@ -172,7 +174,7 @@ function importKLE() {
                 const keyElement = document.createElement('div');
                 keyElement.className = 'canvas-key';
                 keyElement.id = key.id;
-                const KEY_SIZE = 72;
+                const KEY_SIZE = window.getScaledOneU ? window.getScaledOneU() : 72; // Use scaled size
                 const HALF_KEY = KEY_SIZE / 2;
                 keyElement.style.left = (key.x - HALF_KEY) + 'px';
                 keyElement.style.top = (key.y - HALF_KEY) + 'px';
@@ -185,7 +187,8 @@ function importKLE() {
             });
         }
         
-        // Update UI
+        // Switch to Key mode and update UI
+        setMode('key');
         updateKeyWorkflowUI();
         updateOverlapHighlighting();
         
@@ -404,7 +407,7 @@ function generateKLEFormat() {
     
     // 1u (key unit) = 19.05mm = 1.905cm
     // At 96 DPI: 1cm = 37.8px, so 1u = 1.905 * 37.8 = 72px
-    const ONE_U = 72; // pixels per key unit
+    const ONE_U = window.getScaledOneU ? window.getScaledOneU() : 72; // pixels per key unit
     const ROW_THRESHOLD = 10; // pixels to consider same row (small threshold for precision)
     
     // Sort keys by Y position (top to bottom), then by X position (left to right)
@@ -543,7 +546,7 @@ function exportPNG() {
         }
         
         // Calculate bounding box
-        const KEY_SIZE = 72;
+        const KEY_SIZE = window.getScaledOneU ? window.getScaledOneU() : 72;
         const MARGIN = 50; // Margin around content
         
         let minX = Infinity, minY = Infinity;
@@ -587,8 +590,8 @@ function exportPNG() {
         const offsetY = MARGIN - minY;
         
         // Draw grid background
-        const quarterU = 18; // 0.25u grid spacing
-        const oneU = 72; // 1u spacing
+        const quarterU = window.getScaledOneU ? Math.round(window.getScaledOneU() / 4) : 18; // 0.25u grid spacing
+        const oneU = window.getScaledOneU ? window.getScaledOneU() : 72; // 1u spacing
         
         // Minor grid lines
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
