@@ -121,7 +121,7 @@
 .fullscreen-canvas {
     width: 100vw;
     height: 100vh;
-    background: white;
+    background: #1e1e1e;
     cursor: crosshair;
     display: block;
     border: none;
@@ -755,8 +755,7 @@
 /* Key visualization on canvas */
 .canvas-key {
     position: absolute;
-    width: 40px; /* 1u approximation */
-    height: 40px;
+    /* Size is set dynamically in JS - 1u = 72px (19.05mm at 96 DPI) */
     background: rgba(97, 218, 251, 0.3);
     border: 2px solid #61dafb;
     border-radius: 4px;
@@ -768,7 +767,7 @@
     justify-content: center;
     font-weight: bold;
     color: #61dafb;
-    font-size: 14px;
+    font-size: 16px;
     text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
 }
 
@@ -778,8 +777,16 @@
     animation: pulse 1s infinite;
 }
 
+.canvas-key.overlapping {
+    background: rgba(255, 82, 82, 0.7) !important;
+    border: 4px solid #ff5252 !important;
+    border-color: #ff5252 !important;
+    box-shadow: 0 0 20px rgba(255, 82, 82, 0.9) !important;
+    z-index: 100;
+}
+
 .canvas-key {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
 }
 
@@ -1356,6 +1363,32 @@
     background: rgba(206, 145, 120, 0.2);
     border-color: #ce9178;
     color: #ce9178;
+}
+
+.snap-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: #cccccc;
+    user-select: none;
+}
+
+.snap-toggle-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #569cd6;
+}
+
+.snap-toggle-label:hover {
+    color: #ffffff;
+}
+
+.snap-toggle-label span {
+    flex: 1;
 }
 
 /* Update canvas key colors from cyan to vibrant highlights */

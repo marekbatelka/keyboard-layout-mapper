@@ -73,6 +73,12 @@
                                 <div class="key-actions-row">
                                     <button class="key-mgmt-btn reset-key-btn" onclick="resetCurrentKey()" title="Reset Current Key">Reset Key</button>
                                 </div>
+                                <div class="key-actions-row">
+                                    <label class="snap-toggle-label">
+                                        <input type="checkbox" id="snapToGridCheckbox" checked onchange="toggleSnapToGrid(this.checked)">
+                                        <span>Snap to 0.25u Grid</span>
+                                    </label>
+                                </div>
                                 <div class="key-navigation">
                                     <button class="key-mgmt-btn nav-btn" id="prevKeyBtn" onclick="previousKey()" title="Previous Key">←</button>
                                     <span id="keyIndex">1 / 1</span>
@@ -132,6 +138,7 @@
                                 <div class="action-row" id="keyCreateActions" style="display: none;">
                                     <button class="control-btn clear-btn" onclick="clearCurrentKey()">Clear Key</button>
                                     <button class="control-btn export-btn" onclick="exportPNG()">PNG</button>
+                                    <button class="control-btn export-btn" onclick="exportKLE()">KLE</button>
                                 </div>
                                 <div class="action-row">
                                     <button class="control-btn fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>

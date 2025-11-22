@@ -7,6 +7,7 @@ let keyIdCounter = 0;
 let totalKeys = 1;
 let currentKeyIndex = 0;
 let showOnlyCurrentKey = false;
+let snapToGridEnabled = true; // Grid snap toggle
 
 // Make keys array globally accessible for export functions
 window.keys = keys;
@@ -123,6 +124,12 @@ function initializeCanvas() {
     });
 }
 
+// Snap coordinate to 0.25u grid (18px increments)
+function snapToGrid(value) {
+    const gridSize = 18; // 0.25u = 72px / 4 = 18px
+    return Math.round(value / gridSize) * gridSize;
+}
+
 function startFingerMapping() {
     // Reset mapping state
     app.setState({
@@ -150,23 +157,44 @@ function drawCanvasGuides(canvas) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Draw a subtle grid pattern
-    ctx.strokeStyle = '#f5f5f5';
+    // 1u = 72px, 0.25u = 18px (grid snap resolution)
+    const quarterU = 18; // 0.25u grid spacing
+    const oneU = 72; // 1u spacing for major lines
+    
+    // Draw minor grid lines (0.25u) - 70% transparency
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
     ctx.lineWidth = 1;
     
-    // Draw grid based on 1cm x 1cm spacing
-    // Assuming 96 DPI (standard web DPI): 1cm = 37.8px
-    const gridSpacing = 37.8; // 1cm grid
-    
-    // Vertical lines
-    for (let x = 0; x <= canvas.width; x += gridSpacing) {
+    // Vertical minor lines
+    for (let x = 0; x <= canvas.width; x += quarterU) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
         ctx.stroke();
     }
     
-    // Horizontal lines
-    for (let y = 0; y <= canvas.height; y += gridSpacing) {
+    // Horizontal minor lines
+    for (let y = 0; y <= canvas.height; y += quarterU) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+    
+    // Draw major grid lines (1u) - slightly brighter
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 2;
+    
+    // Vertical major lines
+    for (let x = 0; x <= canvas.width; x += oneU) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+    
+    // Horizontal major lines
+    for (let y = 0; y <= canvas.height; y += oneU) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
@@ -699,8 +727,14 @@ function saveCurrentKeyState() {
         const keyElement = document.createElement('div');
         keyElement.className = 'canvas-key';
         keyElement.id = currentKey.id;
-        keyElement.style.left = (currentKey.x - 20) + 'px';
-        keyElement.style.top = (currentKey.y - 20) + 'px';
+        const KEY_SIZE = 72;
+        const HALF_KEY = KEY_SIZE / 2;
+        keyElement.style.left = (currentKey.x - HALF_KEY) + 'px';
+        keyElement.style.top = (currentKey.y - HALF_KEY) + 'px';
+        keyElement.style.setProperty('width', KEY_SIZE + 'px', 'important');
+        keyElement.style.setProperty('height', KEY_SIZE + 'px', 'important');
+        keyElement.style.setProperty('width', KEY_SIZE + 'px', 'important');
+        keyElement.style.setProperty('height', KEY_SIZE + 'px', 'important');
         keyElement.style.transform = `rotate(${currentKey.rotation}deg)`;
         keyElement.textContent = (currentKeyIndex + 1).toString();
         keyElement.style.display = 'flex'; // Always show finalized keys
@@ -717,6 +751,7 @@ function loadKeyState() {
     // Update the UI to show the loaded key
     updateKeyWorkflowUI();
     updateKeyPreview();
+    updateOverlapHighlighting();
 }
 
 // Key management functions
@@ -917,8 +952,13 @@ function handleKeyCreationTap(x, y) {
     const avgX = currentKey.positions.reduce((sum, pos) => sum + pos.x, 0) / currentKey.positions.length;
     const avgY = currentKey.positions.reduce((sum, pos) => sum + pos.y, 0) / currentKey.positions.length;
     
-    currentKey.x = avgX;
-    currentKey.y = avgY;
+    // Apply grid snapping if enabled (0.25u = 18px)
+    currentKey.x = snapToGridEnabled ? snapToGrid(avgX) : avgX;
+    currentKey.y = snapToGridEnabled ? snapToGrid(avgY) : avgY;
+    
+    // 1u key size = 19.05mm = 72px at 96 DPI
+    const KEY_SIZE = 72;
+    const HALF_KEY = KEY_SIZE / 2;
     
     // Create/update finalized key element immediately
     const existingKey = document.getElementById(currentKey.id);
@@ -929,8 +969,10 @@ function handleKeyCreationTap(x, y) {
     const keyElement = document.createElement('div');
     keyElement.className = 'canvas-key';
     keyElement.id = currentKey.id;
-    keyElement.style.left = (currentKey.x - 20) + 'px';
-    keyElement.style.top = (currentKey.y - 20) + 'px';
+    keyElement.style.left = (currentKey.x - HALF_KEY) + 'px';
+    keyElement.style.top = (currentKey.y - HALF_KEY) + 'px';
+    keyElement.style.setProperty('width', KEY_SIZE + 'px', 'important');
+    keyElement.style.setProperty('height', KEY_SIZE + 'px', 'important');
     keyElement.style.transform = `rotate(${currentKey.rotation}deg)`;
     keyElement.textContent = (currentKeyIndex + 1).toString();
     keyElement.style.display = 'flex';
@@ -941,11 +983,64 @@ function handleKeyCreationTap(x, y) {
     updateKeyInfo();
     updateKeyPreview();
     updateKeyWorkflowUI();
+    updateOverlapHighlighting();
     
     // Add tap indicator for feedback with current key styling
     addTapIndicator(x, y, `key-${currentKeyIndex}`);
     
     console.log(`${currentKey.name} click ${currentKey.clicks} at (${x}, ${y}), avg: (${avgX.toFixed(1)}, ${avgY.toFixed(1)})`);
+}
+
+// Check if two keys overlap
+function keysOverlap(key1, key2) {
+    const KEY_SIZE = 72;
+    const HALF_KEY = KEY_SIZE / 2;
+    
+    // Get bounding boxes for both keys
+    const left1 = key1.x - HALF_KEY;
+    const right1 = key1.x + HALF_KEY;
+    const top1 = key1.y - HALF_KEY;
+    const bottom1 = key1.y + HALF_KEY;
+    
+    const left2 = key2.x - HALF_KEY;
+    const right2 = key2.x + HALF_KEY;
+    const top2 = key2.y - HALF_KEY;
+    const bottom2 = key2.y + HALF_KEY;
+    
+    // Check if rectangles overlap (strict inequality to exclude touching)
+    return !(right1 <= left2 || left1 >= right2 || bottom1 <= top2 || top1 >= bottom2);
+}
+
+// Update all keys' visual state based on overlaps
+function updateOverlapHighlighting() {
+    // Check each key against all other keys
+    keys.forEach((key, index) => {
+        if (!key.finalized && key.clicks === 0) return;
+        
+        const keyElement = document.getElementById(key.id);
+        if (!keyElement) return;
+        
+        let hasOverlap = false;
+        
+        // Check against all other keys
+        for (let i = 0; i < keys.length; i++) {
+            if (i === index) continue;
+            const otherKey = keys[i];
+            if (!otherKey.finalized && otherKey.clicks === 0) continue;
+            
+            if (keysOverlap(key, otherKey)) {
+                hasOverlap = true;
+                break;
+            }
+        }
+        
+        // Update visual state
+        if (hasOverlap) {
+            keyElement.classList.add('overlapping');
+        } else {
+            keyElement.classList.remove('overlapping');
+        }
+    });
 }
 
 function updateKeyInfo() {
@@ -974,8 +1069,12 @@ function updateKeyPreview() {
         const keyElement = document.createElement('div');
         keyElement.className = 'canvas-key preview';
         keyElement.id = currentKey.id + '_preview';
-        keyElement.style.left = (currentKey.x - 20) + 'px';
-        keyElement.style.top = (currentKey.y - 20) + 'px';
+        const KEY_SIZE = 72;
+        const HALF_KEY = KEY_SIZE / 2;
+        keyElement.style.left = (currentKey.x - HALF_KEY) + 'px';
+        keyElement.style.top = (currentKey.y - HALF_KEY) + 'px';
+        keyElement.style.setProperty('width', KEY_SIZE + 'px', 'important');
+        keyElement.style.setProperty('height', KEY_SIZE + 'px', 'important');
         keyElement.style.transform = `rotate(${currentKey.rotation}deg)`;
         keyElement.textContent = (currentKeyIndex + 1).toString();
         keyElement.style.display = 'flex'; // Always show preview in key creation mode
@@ -1003,6 +1102,11 @@ function toggleKeyPanel() {
 // Tap visibility control
 let tapIndicatorsVisible = true;
 let keysVisible = true;
+
+function toggleSnapToGrid(enabled) {
+    snapToGridEnabled = enabled;
+    console.log('Snap to grid:', enabled ? 'enabled' : 'disabled');
+}
 
 function toggleTapVisibility(show) {
     tapIndicatorsVisible = show;

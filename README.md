@@ -13,29 +13,27 @@ A tablet-optimized web application for creating custom keyboard layouts with int
 
 ## Features
 
-### 🎯 Interactive Finger Mapping
-- **Free canvas mapping**: Tap anywhere on fullscreen canvas
-- **No limitations**: Switch fingers/hands freely, unlimited taps
-- **Real-time visualization**: Color-coded tap indicators
-- **Both hands support**: Independent left and right hand mapping
+### 🎯 Interactive Key Creation
+- **Precision positioning**: Tap multiple times per key for averaged, accurate placement
+- **0.25u grid snapping**: Optional snap-to-grid at 0.25u intervals (4.76mm precision)
+- **72px key size**: 1u = 19.05mm = 72px at 96 DPI for accurate physical representation
+- **Real-time preview**: See keys as you create them with live positioning
+- **Key management**: Add, remove, navigate, and reset keys easily
+- **Overlap detection**: Visual red highlighting when keys overlap
 
-### 📱 Tablet-Optimized Interface
-- **Fullscreen canvas**: Immersive mapping experience
-- **Touch-friendly design**: Large touch targets optimized for fingers
-- **Floating controls**: Compact, collapsible control panel
-- **Gesture support**: Tap, long-press, and multi-touch handling
-- **Responsive layout**: Perfect for tablets, works on all screen sizes
-- **Haptic feedback**: Vibration feedback on supported devices
-- **Keyboard shortcuts**: Quick finger/hand switching (1-5, Q/E keys)
-
-### 🎨 Visual Design
-- **Color-coded fingers**: Each finger has a distinct color
-- **Progress tracking**: Visual feedback on mapping progress
-- **Real-time preview**: See your layout as you create it
-- **Professional UI**: Modern, clean interface design
+### 📐 Advanced Layout Tools
+- **Multi-tap averaging**: Each key position averaged from up to 10 taps for precision
+- **Grid visualization**: Subtle grid overlay showing 0.25u and 1u increments
+- **Toggleable snapping**: Enable/disable 0.25u grid snapping on the fly
+- **No overlap mode**: Keys are only flagged as overlapping if they actually share space (touching is OK)
+- **Dark canvas**: Professional dark background for better key visibility
 
 ### 📤 Export Formats
-- **PNG**: Image of canvas
+- **KLE (Keyboard Layout Editor)**: Copy layout directly to keyboard-layout-editor.com
+  - Proper row/column spacing with {x:N} and {y:N} metadata
+  - Supports diagonal layouts and custom row spacing
+  - Multi-line formatted output for readability
+- **PNG**: Visual export of your layout canvas
 
 ## 📱 GitHub Pages Deployment
 
@@ -62,14 +60,17 @@ If you prefer manual deployment:
 
 ### On Tablet (Recommended):
 1. **Visit the live demo** link above on your tablet
-4. **Start mapping**: The canvas goes fullscreen automatically
-5. **Tap with different fingers**: Use the floating controls to switch fingers/hands
+2. **Click "Create Keys"** to enter key creation mode
+3. **Tap positions** on the canvas to place keys (up to 10 taps per key averaged for precision)
+4. **Navigate keys** using Previous/Next buttons
+5. **Toggle grid snapping** with the "Snap to 0.25u Grid" checkbox
+6. **Export to KLE** when done - copies directly to clipboard for keyboard-layout-editor.com
 
 ### Local Development:
 1. **Clone the repository**: `git clone https://github.com/your-username/kbdlayout.git`
 2. **Open `index.html`** in a modern web browser
 3. **Start a local server** (optional): `python3 -m http.server 8080`
-4. **Follow the online steps** above
+4. **Follow the tablet steps** above
 
 ## File Structure
 
@@ -142,13 +143,15 @@ This application is specifically optimized for tablet use via GitHub Pages:
 - **Touch-optimized** - designed for finger interaction, not mouse clicks
 - **Fullscreen experience** - maximum canvas space for accurate mapping
 
-## 📋 **Tablet Testing Checklist**
-- ✅ Touch accuracy (taps register exactly where you touch)
-- ✅ Finger switching (easy to change between fingers)
-- ✅ Hand switching (left/right hand support)
-- ✅ Control visibility (floating panel doesn't obstruct canvas)
-- ✅ Orientation support (works in landscape and portrait)
-- ✅ Export functionality (generate layouts for import)
+## 📋 **Key Features Checklist**
+- ✅ **Precision grid**: 0.25u (4.76mm) snapping resolution
+- ✅ **Accurate sizing**: 72px = 1u = 19.05mm physical key size
+- ✅ **Multi-tap averaging**: Up to 10 taps per key for perfect positioning
+- ✅ **Overlap detection**: Visual feedback for key collisions
+- ✅ **KLE export**: Direct copy-paste to keyboard-layout-editor.com
+- ✅ **Touch-optimized**: Designed for tablet finger interaction
+- ✅ **Real-time preview**: See your layout as you build it
+- ✅ **No registration**: Fully client-side, no account needed
 
 ---
 
