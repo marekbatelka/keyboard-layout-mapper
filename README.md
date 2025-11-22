@@ -29,11 +29,65 @@ A tablet-optimized web application for creating custom keyboard layouts with int
 - **Dark canvas**: Professional dark background for better key visibility
 
 ### 📤 Export Formats
-- **KLE (Keyboard Layout Editor)**: Copy layout directly to keyboard-layout-editor.com
+- **KLE (Keyboard Layout Editor)**: Export and import layouts
   - Proper row/column spacing with {x:N} and {y:N} metadata
   - Supports diagonal layouts and custom row spacing
   - Multi-line formatted output for readability
+  - Import existing KLE layouts for editing
+  - Modal popup display for easy copying on tablets
 - **PNG**: Visual export of your layout canvas
+
+> **Note**: Currently supports 1u (standard) keys only. Key rotation, custom key sizes, and key legends are not yet supported.
+
+## Quick Start
+
+### On Tablet (Recommended):
+1. **Visit the live demo** link above on your tablet
+2. **Choose a mode** from the mode selector (Move, Tap, Key, Export)
+3. **Create your layout** by switching between modes as needed
+4. **Export** your layout when done
+
+### Understanding the Modes
+
+The application has 4 distinct modes to streamline your workflow:
+
+#### 🖐️ **Key Mode** (Default)
+Create and edit keyboard keys with precision positioning.
+- **Tap the canvas** to record up to 10 positions per key
+- **Position is averaged** from all taps for accuracy
+- **Navigate** between keys using Previous/Next buttons
+- **Add/Remove** keys as needed
+- **Toggle grid snapping** for 0.25u precision alignment
+- **Visual feedback** shows overlapping keys in red
+
+#### ✋ **Tap Mode**
+Record finger mapping positions for ergonomic analysis.
+- **Select finger** (Thumb, Index, Middle, Ring, Pinky)
+- **Select hand** (Left, Right)
+- **Tap positions** to record natural finger reach
+- **Clear/Reset** mappings as needed
+- Useful for planning ergonomic layouts based on your hand position
+
+#### 🔄 **Move Mode**
+Pan and reposition the canvas, keys, or tap indicators.
+- **Lock Keys**: Prevent keys from moving (checked by default)
+- **Lock Taps**: Prevent tap indicators from moving (checked by default)
+- **Lock Canvas**: Prevent grid background from moving (unchecked by default)
+- **Drag the canvas** to pan unlocked elements
+- Ideal for: positioning the grid under existing keys, or moving everything together
+
+#### 📤 **Export Mode**
+Save or import your keyboard layouts.
+- **Export PNG**: Save a visual image of your layout
+- **Export KLE**: Display KLE format in modal for easy copying (tablet-friendly)
+- **Import KLE**: Load existing layouts from KLE format
+- All exports use standard KLE format without quotes on property names
+
+### Workflow Tips
+1. Start in **Key Mode** to place your keys by tapping positions
+2. Use **Move Mode** with locked keys to align the grid underneath
+3. Switch to **Export Mode** to save your work
+4. Use **Tap Mode** if you want to analyze finger reach patterns
 
 ## 📱 GitHub Pages Deployment
 
@@ -47,32 +101,23 @@ This project is configured for automatic GitHub Pages deployment:
 3. **Push to main branch** - site deploys automatically
 4. **Access your live site** at: `https://your-username.github.io/keyboard-layout-mapper`
 
-### Manual Setup
-If you prefer manual deployment:
+## Development
 
-1. **Create a new repository** on GitHub
-2. **Upload all files** to the repository
-3. **Enable GitHub Pages** in Settings > Pages
-4. **Select source**: "Deploy from a branch" > "main" > "/ (root)"
-5. **Wait 5-10 minutes** for deployment
-
-## Quick Start
-
-### On Tablet (Recommended):
-1. **Visit the live demo** link above on your tablet
-2. **Click "Create Keys"** to enter key creation mode
-3. **Tap positions** on the canvas to place keys (up to 10 taps per key averaged for precision)
-4. **Navigate keys** using Previous/Next buttons
-5. **Toggle grid snapping** with the "Snap to 0.25u Grid" checkbox
-6. **Export to KLE** when done - copies directly to clipboard for keyboard-layout-editor.com
-
-### Local Development:
+### Local Development
 1. **Clone the repository**: `git clone https://github.com/your-username/kbdlayout.git`
 2. **Open `index.html`** in a modern web browser
 3. **Start a local server** (optional): `python3 -m http.server 8080`
-4. **Follow the tablet steps** above
+4. **No build process required**: Pure HTML/CSS/JavaScript
 
-## File Structure
+## Development
+
+### Local Development
+1. **Clone the repository**: `git clone https://github.com/your-username/kbdlayout.git`
+2. **Open `index.html`** in a modern web browser
+3. **Start a local server** (optional): `python3 -m http.server 8080`
+4. **No build process required**: Pure HTML/CSS/JavaScript
+
+### File Structure
 
 ```
 kbdlayout/
@@ -83,75 +128,23 @@ kbdlayout/
 │   └── mapping.css         # Mapping interface and grid styles
 ├── js/
 │   ├── app.js             # Main application logic and state management
-│   ├── wizard.js          # Setup wizard functionality
+│   ├── wizard.js          # Key creation, modes, and canvas panning
 │   ├── mapping.js         # Finger mapping and data processing
-│   ├── export.js          # Export functionality for different formats
+│   ├── export.js          # Export/Import functionality (KLE, PNG)
 │   └── touch-handler.js   # Touch and gesture handling
 └── .github/
     └── copilot-instructions.md # Project development guidelines
 ```
 
-## 📱 GitHub Pages Deployment
-
-### Automatic Deployment
-This project is configured for automatic GitHub Pages deployment:
-
-1. **Fork this repository** to your GitHub account
-2. **Enable GitHub Pages** in repository settings:
-   - Go to Settings > Pages
-   - Source: "GitHub Actions"
-3. **Push to main branch** - site deploys automatically
-4. **Access your live site** at: `https://your-username.github.io/kbdlayout`
-
-### Manual Setup
-If you prefer manual deployment:
-
-1. **Create a new repository** on GitHub
-2. **Upload all files** to the repository
-3. **Enable GitHub Pages** in Settings > Pages
-4. **Select source**: "Deploy from a branch" > "main" > "/ (root)"
-5. **Wait 5-10 minutes** for deployment
-
-## Development
-
-### Local Development
-1. **No build process required**: Pure HTML/CSS/JavaScript
-2. **Serve locally**: Use any static file server
-3. **Live reload**: Use VS Code Live Server extension
-
 ### Testing
+- **Tablet**: Best experience via GitHub Pages link
 - **Desktop**: Mouse simulation of touch events
-- **Tablet**: Direct testing via GitHub Pages link
 - **Mobile**: Responsive design works on phones too
-- **Cross-browser**: Test on multiple browsers and devices
-
-## License
-
-MIT License - see LICENSE file for details
 
 ## Acknowledgments
 
 - **Ergogen**: Keyboard generator that inspired export format
----
-
-## 🌐 **Perfect for Tablets**
-
-This application is specifically optimized for tablet use via GitHub Pages:
-- **No installation required** - runs directly in your tablet browser
-- **Offline capable** - works even without internet after first load
-- **Cross-platform** - works on iPad, Android tablets, Surface, etc.
-- **Touch-optimized** - designed for finger interaction, not mouse clicks
-- **Fullscreen experience** - maximum canvas space for accurate mapping
-
-## 📋 **Key Features Checklist**
-- ✅ **Precision grid**: 0.25u (4.76mm) snapping resolution
-- ✅ **Accurate sizing**: 72px = 1u = 19.05mm physical key size
-- ✅ **Multi-tap averaging**: Up to 10 taps per key for perfect positioning
-- ✅ **Overlap detection**: Visual feedback for key collisions
-- ✅ **KLE export**: Direct copy-paste to keyboard-layout-editor.com
-- ✅ **Touch-optimized**: Designed for tablet finger interaction
-- ✅ **Real-time preview**: See your layout as you build it
-- ✅ **No registration**: Fully client-side, no account needed
+- **KLE**: keyboard-layout-editor.com for standard layout format
 
 ---
 

@@ -1,4 +1,5 @@
 // Global state
+let currentMode = 'key'; // 'move', 'tap', 'key'
 let keyCreationMode = false;
 let currentKey = null;
 let keyClickPositions = [];
@@ -8,6 +9,13 @@ let totalKeys = 1;
 let currentKeyIndex = 0;
 let showOnlyCurrentKey = false;
 let snapToGridEnabled = true; // Grid snap toggle
+
+// Canvas panning state
+let canvasPanX = 0;
+let canvasPanY = 0;
+let isPanning = false;
+let lastPanX = 0;
+let lastPanY = 0;
 
 // Make keys array globally accessible for export functions
 window.keys = keys;
@@ -31,6 +39,13 @@ window.addEventListener('DOMContentLoaded', function() {
     
     // Initialize the canvas and mapping
     initializeMapping();
+    
+    // Set initial mode to 'key'
+    setTimeout(() => {
+        setMode('key');
+        // Initialize panel position based on default hand (right)
+        updatePanelPosition(app.state.currentHand);
+    }, 100);
 });
 
 // Wizard functionality - removed startWizard since we start directly with config
@@ -115,6 +130,17 @@ function initializeCanvas() {
     // Prevent context menu
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     
+    // Canvas panning listeners
+    canvas.addEventListener('mousedown', handlePanStart);
+    canvas.addEventListener('mousemove', handlePanMove);
+    canvas.addEventListener('mouseup', handlePanEnd);
+    canvas.addEventListener('mouseleave', handlePanEnd);
+    
+    canvas.addEventListener('touchstart', handlePanStart, { passive: false });
+    canvas.addEventListener('touchmove', handlePanMove, { passive: false });
+    canvas.addEventListener('touchend', handlePanEnd);
+    canvas.addEventListener('touchcancel', handlePanEnd);
+    
     // Draw canvas guidelines
     drawCanvasGuides(canvas);
     
@@ -154,19 +180,31 @@ function updateInstructionText() {
 
 function drawCanvasGuides(canvas) {
     const ctx = canvas.getContext('2d');
+    
+    // Save current transform and reset it for clearing
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
     
     // Draw a subtle grid pattern
     // 1u = 72px, 0.25u = 18px (grid snap resolution)
     const quarterU = 18; // 0.25u grid spacing
     const oneU = 72; // 1u spacing for major lines
     
-    // Draw minor grid lines (0.25u) - 70% transparency
+    // Calculate the grid offset based on pan
+    // Find the starting point that aligns with the grid
+    const offsetX = canvasPanX % quarterU;
+    const offsetY = canvasPanY % quarterU;
+    const startX = offsetX - quarterU;
+    const startY = offsetY - quarterU;
+    
+    // Draw minor grid lines (0.25u) - 15% opacity
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
     ctx.lineWidth = 1;
     
     // Vertical minor lines
-    for (let x = 0; x <= canvas.width; x += quarterU) {
+    for (let x = startX; x <= canvas.width; x += quarterU) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
@@ -174,19 +212,25 @@ function drawCanvasGuides(canvas) {
     }
     
     // Horizontal minor lines
-    for (let y = 0; y <= canvas.height; y += quarterU) {
+    for (let y = startY; y <= canvas.height; y += quarterU) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
         ctx.stroke();
     }
     
+    // Calculate major grid starting points (1u)
+    const majorOffsetX = canvasPanX % oneU;
+    const majorOffsetY = canvasPanY % oneU;
+    const majorStartX = majorOffsetX - oneU;
+    const majorStartY = majorOffsetY - oneU;
+    
     // Draw major grid lines (1u) - slightly brighter
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.lineWidth = 2;
     
     // Vertical major lines
-    for (let x = 0; x <= canvas.width; x += oneU) {
+    for (let x = majorStartX; x <= canvas.width; x += oneU) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
@@ -194,7 +238,7 @@ function drawCanvasGuides(canvas) {
     }
     
     // Horizontal major lines
-    for (let y = 0; y <= canvas.height; y += oneU) {
+    for (let y = majorStartY; y <= canvas.height; y += oneU) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
@@ -274,13 +318,17 @@ function handleCanvasTap(event) {
         rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
         relative: { x: x, y: y },
         bounded: { x: boundedX, y: boundedY },
-        canvas: { x: canvasX, y: canvasY }
+        canvas: { x: canvasX, y: canvasY },
+        mode: currentMode
     });
     
-    if (keyCreationMode && currentKey) {
+    if (currentMode === 'move') {
+        // Move mode - pan handled by mouse/touch move events
+        return;
+    } else if (currentMode === 'key' && currentKey) {
         handleKeyCreationTap(boundedX, boundedY);
-    } else {
-        // Free mapping mode - record finger mapping taps
+    } else if (currentMode === 'tap') {
+        // Tap mode - record finger mapping taps
         recordCanvasTap(canvasX, canvasY);
         
         // Add visual indicator using the bounded screen coordinates
@@ -343,7 +391,38 @@ function switchHand(hand) {
         currentHand: hand
     });
     updateHandButtons();
+    updatePanelPosition(hand);
     console.log('Switched to hand:', hand);
+}
+
+function updatePanelPosition(hand) {
+    const panel = document.getElementById('keyPanel');
+    const fullscreenBtn = document.querySelector('.fullscreen-icon-btn');
+    
+    // Left hand = panel on right, Right hand = panel on left
+    if (hand === 'left') {
+        // Panel on right
+        if (panel) {
+            panel.style.left = 'auto';
+            panel.style.right = '20px';
+        }
+        // Fullscreen button on left
+        if (fullscreenBtn) {
+            fullscreenBtn.style.right = 'auto';
+            fullscreenBtn.style.left = '20px';
+        }
+    } else {
+        // Panel on left
+        if (panel) {
+            panel.style.left = '20px';
+            panel.style.right = 'auto';
+        }
+        // Fullscreen button on right
+        if (fullscreenBtn) {
+            fullscreenBtn.style.left = 'auto';
+            fullscreenBtn.style.right = '20px';
+        }
+    }
 }
 
 function updateFingerButtons() {
@@ -605,65 +684,13 @@ function resetMapping() {
 
 // Key creation workflow functions
 function startKeyCreationMode() {
-    keyCreationMode = true;
-    
-    // Initialize with first key if no keys exist
-    if (keys.length === 0) {
-        keys.push({
-            id: `key_0`,
-            name: `Key 1`,
-            x: 0,
-            y: 0,
-            rotation: 0,
-            clicks: 0,
-            positions: [],
-            finalized: false
-        });
-        totalKeys = 1;
-        currentKeyIndex = 0;
-        window.keys = keys;
-    }
-    
-    currentKey = keys[currentKeyIndex];
-    
-    // Update UI - keep main controls visible but add key creation section
-    document.getElementById('startKeyModeBtn').style.display = 'none';
-    document.getElementById('pauseKeyModeBtn').style.display = 'inline-block';
-    document.getElementById('keyProgressSection').style.display = 'block';
-    document.getElementById('freeMappingInfo').style.display = 'none';
-    
-    // Switch action buttons
-    document.getElementById('freeMapActions').style.display = 'none';
-    document.getElementById('keyCreateActions').style.display = 'flex';
-    
-    updateKeyWorkflowUI();
-    updateKeyPreview();
-    console.log('Started key creation mode with', keys.length, 'keys');
+    // Deprecated - use setMode('key') instead
+    setMode('key');
 }
 
 function pauseKeyCreationMode() {
-    keyCreationMode = false;
-    
-    // Save current key state
-    if (currentKey) {
-        saveCurrentKeyState();
-    }
-    
-    // Update UI - show free mapping controls
-    document.getElementById('startKeyModeBtn').style.display = 'inline-block';
-    document.getElementById('pauseKeyModeBtn').style.display = 'none';
-    document.getElementById('keyProgressSection').style.display = 'none';
-    document.getElementById('freeMappingInfo').style.display = 'block';
-    
-    // Switch action buttons
-    document.getElementById('freeMapActions').style.display = 'flex';
-    document.getElementById('keyCreateActions').style.display = 'none';
-    
-    // Remove preview
-    const preview = document.querySelector('.canvas-key.preview');
-    if (preview) preview.remove();
-    
-    console.log('Paused key creation mode - now in free mapping');
+    // Deprecated - use setMode('tap') instead
+    setMode('tap');
 }
 
 function startKeyCreationWorkflow() {
@@ -1106,6 +1133,199 @@ let keysVisible = true;
 function toggleSnapToGrid(enabled) {
     snapToGridEnabled = enabled;
     console.log('Snap to grid:', enabled ? 'enabled' : 'disabled');
+}
+
+// Mode switching functions
+function setMode(mode) {
+    currentMode = mode;
+    
+    // Update button states
+    document.getElementById('moveMode').classList.remove('active');
+    document.getElementById('tapMode').classList.remove('active');
+    document.getElementById('keyMode').classList.remove('active');
+    document.getElementById('exportMode').classList.remove('active');
+    document.getElementById(mode + 'Mode').classList.add('active');
+    
+    // Update mode description and UI sections
+    const modeDescElement = document.getElementById('modeDescription');
+    const keyProgressSection = document.getElementById('keyProgressSection');
+    const freeMappingInfo = document.getElementById('freeMappingInfo');
+    const freeMapActions = document.getElementById('freeMapActions');
+    const keyCreateActions = document.getElementById('keyCreateActions');
+    
+    if (mode === 'move') {
+        modeDescElement.textContent = 'Move Mode: Pan canvas, keys, or taps';
+        keyProgressSection.style.display = 'none';
+        freeMappingInfo.style.display = 'none';
+        freeMapActions.style.display = 'none';
+        keyCreateActions.style.display = 'flex';
+        document.getElementById('moveModeOptions').style.display = 'block';
+        document.getElementById('exportModeOptions').style.display = 'none';
+        keyCreationMode = false;
+        
+        // Change cursor
+        document.getElementById('tap-canvas').style.cursor = 'grab';
+    } else if (mode === 'tap') {
+        modeDescElement.textContent = 'Tap Mode: Record finger mapping positions';
+        keyProgressSection.style.display = 'none';
+        freeMappingInfo.style.display = 'block';
+        freeMapActions.style.display = 'flex';
+        keyCreateActions.style.display = 'none';
+        document.getElementById('moveModeOptions').style.display = 'none';
+        document.getElementById('exportModeOptions').style.display = 'none';
+        keyCreationMode = false;
+        
+        // Restore cursor
+        document.getElementById('tap-canvas').style.cursor = 'crosshair';
+    } else if (mode === 'key') {
+        modeDescElement.textContent = 'Key Mode: Create and edit keys';
+        keyProgressSection.style.display = 'block';
+        freeMappingInfo.style.display = 'none';
+        freeMapActions.style.display = 'none';
+        keyCreateActions.style.display = 'flex';
+        document.getElementById('moveModeOptions').style.display = 'none';
+        document.getElementById('exportModeOptions').style.display = 'none';
+        keyCreationMode = true;
+        
+        // Initialize key mode if needed
+        if (keys.length === 0) {
+            keys.push({
+                id: `key_0`,
+                name: `Key 1`,
+                x: 0,
+                y: 0,
+                rotation: 0,
+                clicks: 0,
+                positions: [],
+                finalized: false
+            });
+            totalKeys = 1;
+            currentKeyIndex = 0;
+            window.keys = keys;
+        }
+        
+        currentKey = keys[currentKeyIndex];
+        updateKeyWorkflowUI();
+        updateKeyPreview();
+        
+        // Restore cursor
+        document.getElementById('tap-canvas').style.cursor = 'crosshair';
+    } else if (mode === 'export') {
+        modeDescElement.textContent = 'Export Mode: Save or import layouts';
+        keyProgressSection.style.display = 'none';
+        freeMappingInfo.style.display = 'none';
+        freeMapActions.style.display = 'none';
+        keyCreateActions.style.display = 'none';
+        document.getElementById('moveModeOptions').style.display = 'none';
+        document.getElementById('exportModeOptions').style.display = 'block';
+        keyCreationMode = false;
+        
+        // Restore cursor
+        document.getElementById('tap-canvas').style.cursor = 'default';
+    }
+    
+    console.log('Mode changed to:', mode);
+}
+
+// Canvas panning functions
+function handlePanStart(event) {
+    if (currentMode !== 'move') return;
+    
+    isPanning = true;
+    
+    let clientX, clientY;
+    if (event.touches && event.touches.length > 0) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
+    
+    lastPanX = clientX;
+    lastPanY = clientY;
+    
+    document.getElementById('tap-canvas').style.cursor = 'grabbing';
+    event.preventDefault();
+}
+
+function handlePanMove(event) {
+    if (currentMode !== 'move' || !isPanning) return;
+    
+    let clientX, clientY;
+    if (event.touches && event.touches.length > 0) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
+    
+    const deltaX = clientX - lastPanX;
+    const deltaY = clientY - lastPanY;
+    
+    canvasPanX += deltaX;
+    canvasPanY += deltaY;
+    
+    lastPanX = clientX;
+    lastPanY = clientY;
+    
+    // Get lock states
+    const lockKeys = document.getElementById('lockKeys')?.checked || false;
+    const lockTaps = document.getElementById('lockTaps')?.checked || false;
+    const lockCanvas = document.getElementById('lockCanvas')?.checked || false;
+    
+    // Pan canvas (grid background) if not locked
+    if (!lockCanvas) {
+        const canvas = document.getElementById('tap-canvas');
+        
+        // Redraw grid with new pan offset
+        drawCanvasGuides(canvas);
+    }
+    
+    // Update key positions if not locked
+    if (!lockKeys) {
+        const allKeys = document.querySelectorAll('.canvas-key');
+        allKeys.forEach(keyEl => {
+            const currentLeft = parseFloat(keyEl.style.left) || 0;
+            const currentTop = parseFloat(keyEl.style.top) || 0;
+            keyEl.style.left = (currentLeft + deltaX) + 'px';
+            keyEl.style.top = (currentTop + deltaY) + 'px';
+        });
+        
+        // Update key data
+        keys.forEach(key => {
+            key.x += deltaX;
+            key.y += deltaY;
+            if (key.positions && key.positions.length > 0) {
+                key.positions.forEach(pos => {
+                    pos.x += deltaX;
+                    pos.y += deltaY;
+                });
+            }
+        });
+    }
+    
+    // Update tap indicators if not locked
+    if (!lockTaps) {
+        const allTaps = document.querySelectorAll('.tap-indicator');
+        allTaps.forEach(tapEl => {
+            const currentLeft = parseFloat(tapEl.style.left) || 0;
+            const currentTop = parseFloat(tapEl.style.top) || 0;
+            tapEl.style.left = (currentLeft + deltaX) + 'px';
+            tapEl.style.top = (currentTop + deltaY) + 'px';
+        });
+    }
+    
+    event.preventDefault();
+}
+
+function handlePanEnd(event) {
+    if (currentMode !== 'move') return;
+    
+    isPanning = false;
+    document.getElementById('tap-canvas').style.cursor = 'grab';
+    event.preventDefault();
 }
 
 function toggleTapVisibility(show) {

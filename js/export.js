@@ -1,6 +1,206 @@
-// Export functionality - PNG only
+// Export functionality - PNG and KLE
 
+// KLE Import/Export functions
+function showImportModal() {
+    const modal = document.getElementById('import-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
 
+function closeImportModal() {
+    const modal = document.getElementById('import-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    const input = document.getElementById('import-kle-input');
+    if (input) {
+        input.value = '';
+    }
+}
+
+function importKLE() {
+    const input = document.getElementById('import-kle-input');
+    let kleData = input.value.trim();
+    
+    if (!kleData) {
+        alert('Please paste KLE data first!');
+        return;
+    }
+    
+    try {
+        // Clean up common issues
+        // If data has line breaks between rows, wrap it in outer brackets
+        if (kleData.match(/^\[.*\],\s*\n\[/)) {
+            kleData = '[' + kleData + ']';
+        }
+        
+        // Remove any trailing commas before closing brackets
+        kleData = kleData.replace(/,(\s*[\]}])/g, '$1');
+        
+        // Add quotes to unquoted property names for valid JSON parsing
+        kleData = kleData.replace(/([{,]\s*)([axywh])(\s*:)/g, '$1"$2"$3');
+        
+        // Try to extract just the layout array if it's part of a larger object
+        let layout;
+        
+        try {
+            const parsed = JSON.parse(kleData);
+            
+            // Check if it's already an array (the layout itself)
+            if (Array.isArray(parsed)) {
+                layout = parsed;
+            }
+            // Check if it's an object with a layout property
+            else if (parsed && typeof parsed === 'object') {
+                if (parsed.layout && Array.isArray(parsed.layout)) {
+                    layout = parsed.layout;
+                } else if (parsed.keys && Array.isArray(parsed.keys)) {
+                    layout = parsed.keys;
+                } else {
+                    throw new Error('Could not find layout array in the data');
+                }
+            } else {
+                throw new Error('Invalid data format');
+            }
+        } catch (parseError) {
+            throw new Error('Invalid JSON format. Expected array like [[{"a":7},""],["",""]] or with line breaks');
+        }
+        
+        if (!Array.isArray(layout)) {
+            throw new Error('Invalid KLE format: expected an array');
+        }
+        
+        // Convert KLE format to our internal key format
+        const ONE_U = 72; // pixels per key unit
+        const importedKeys = [];
+        
+        let currentX = 0;
+        let currentY = 0;
+        let keyIndex = 0;
+        
+        // Process each item - handle both flat and nested array formats
+        for (let i = 0; i < layout.length; i++) {
+            const item = layout[i];
+            
+            if (Array.isArray(item)) {
+                // Nested row format
+                currentX = 0;
+                currentY += ONE_U;
+                
+                for (let j = 0; j < item.length; j++) {
+                    const rowItem = item[j];
+                    
+                    if (typeof rowItem === 'object' && !Array.isArray(rowItem)) {
+                        if (rowItem.x !== undefined) currentX += rowItem.x * ONE_U;
+                        if (rowItem.y !== undefined) currentY += rowItem.y * ONE_U;
+                    } else if (typeof rowItem === 'string') {
+                        importedKeys.push({
+                            id: `key_${keyIndex}`,
+                            name: `Key ${keyIndex + 1}`,
+                            x: currentX,
+                            y: currentY,
+                            rotation: 0,
+                            clicks: 10,
+                            positions: [{ x: currentX, y: currentY }],
+                            finalized: true
+                        });
+                        keyIndex++;
+                        currentX += ONE_U;
+                    }
+                }
+            } else if (typeof item === 'object' && !Array.isArray(item)) {
+                // Metadata object
+                if (item.x !== undefined) currentX += item.x * ONE_U;
+                if (item.y !== undefined) currentY += (1 + item.y) * ONE_U;
+            } else if (typeof item === 'string') {
+                // Flat format key
+                importedKeys.push({
+                    id: `key_${keyIndex}`,
+                    name: `Key ${keyIndex + 1}`,
+                    x: currentX,
+                    y: currentY,
+                    rotation: 0,
+                    clicks: 10,
+                    positions: [{ x: currentX, y: currentY }],
+                    finalized: true
+                });
+                keyIndex++;
+                currentX += ONE_U;
+            }
+        }
+        
+        if (importedKeys.length === 0) {
+            throw new Error('No keys found in KLE data');
+        }
+        
+        // Find the bounding box of imported keys
+        const minX = Math.min(...importedKeys.map(k => k.x));
+        const minY = Math.min(...importedKeys.map(k => k.y));
+        
+        // Offset to center the layout on screen (or place it visibly)
+        const canvas = document.getElementById('tap-canvas');
+        const offsetX = (canvas ? canvas.width / 4 : 300) - minX; // Place at 1/4 from left
+        const offsetY = (canvas ? canvas.height / 4 : 300) - minY; // Place at 1/4 from top
+        
+        // Apply offset to all keys
+        importedKeys.forEach(key => {
+            key.x += offsetX;
+            key.y += offsetY;
+            // Update positions array as well
+            if (key.positions && key.positions.length > 0) {
+                key.positions[0].x += offsetX;
+                key.positions[0].y += offsetY;
+            }
+        });
+        
+        // Clear existing keys and load imported keys
+        window.keys = importedKeys;
+        totalKeys = importedKeys.length;
+        currentKeyIndex = 0;
+        currentKey = importedKeys[0];
+        
+        // Redraw all keys on canvas
+        const overlay = document.querySelector('.canvas-overlay');
+        if (overlay) {
+            // Remove all existing key elements
+            const existingKeys = overlay.querySelectorAll('.canvas-key');
+            existingKeys.forEach(el => el.remove());
+            
+            // Add imported keys
+            importedKeys.forEach((key, idx) => {
+                const keyElement = document.createElement('div');
+                keyElement.className = 'canvas-key';
+                keyElement.id = key.id;
+                const KEY_SIZE = 72;
+                const HALF_KEY = KEY_SIZE / 2;
+                keyElement.style.left = (key.x - HALF_KEY) + 'px';
+                keyElement.style.top = (key.y - HALF_KEY) + 'px';
+                keyElement.style.setProperty('width', KEY_SIZE + 'px', 'important');
+                keyElement.style.setProperty('height', KEY_SIZE + 'px', 'important');
+                keyElement.style.transform = `rotate(${key.rotation}deg)`;
+                keyElement.textContent = (idx + 1).toString();
+                keyElement.style.display = 'flex';
+                overlay.appendChild(keyElement);
+            });
+        }
+        
+        // Update UI
+        updateKeyWorkflowUI();
+        updateOverlapHighlighting();
+        
+        // Close modal
+        closeImportModal();
+        
+        alert(`Successfully imported ${importedKeys.length} keys from KLE!`);
+        
+        console.log('Imported keys:', importedKeys);
+        
+    } catch (error) {
+        console.error('KLE import error:', error);
+        alert('Failed to import KLE data: ' + error.message + '\\n\\nMake sure you copied the raw JSON data from keyboard-layout-editor.com');
+    }
+}
 
 // Ergogen export functionality removed
 
@@ -123,22 +323,70 @@ function exportKLE() {
         const kleData = generateKLEFormat();
         console.log('KLE data generated:', kleData);
         
-        // Copy to clipboard directly
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(kleData).then(() => {
-                alert('KLE layout copied to clipboard!\n\nPaste it into keyboard-layout-editor.com');
-            }).catch(err => {
-                console.error('Clipboard copy failed:', err);
-                // Fallback to modal display
-                displayExportCode(kleData, 'KLE');
-            });
-        } else {
-            // Fallback for browsers without clipboard API
-            displayExportCode(kleData, 'KLE');
-        }
+        // Show in modal popup
+        showExportModal(kleData);
     } catch (error) {
         console.error('KLE export error:', error);
         alert('KLE export failed: ' + error.message);
+    }
+}
+
+function showExportModal(kleData) {
+    console.log('showExportModal called with data:', kleData?.substring(0, 100));
+    const modal = document.getElementById('export-modal');
+    const output = document.getElementById('export-kle-output');
+    
+    console.log('Modal element:', modal);
+    console.log('Output element:', output);
+    
+    if (modal && output) {
+        output.value = kleData;
+        modal.style.display = 'flex';
+        console.log('Modal display set to flex, computed style:', window.getComputedStyle(modal).display);
+    } else {
+        console.error('Modal or output element not found!');
+        alert('Export modal not found. Please refresh the page.');
+    }
+}
+
+function closeExportModal() {
+    const modal = document.getElementById('export-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function selectAllKLE() {
+    const output = document.getElementById('export-kle-output');
+    if (output) {
+        output.select();
+        output.setSelectionRange(0, output.value.length);
+    }
+}
+
+function copyKLEToClipboard() {
+    const output = document.getElementById('export-kle-output');
+    if (!output) return;
+    
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(output.value).then(() => {
+            alert('✓ Copied to clipboard!');
+        }).catch(err => {
+            console.error('Clipboard copy failed:', err);
+            // Fallback to select
+            selectAllKLE();
+            alert('Copy failed. Please use Ctrl+C / Cmd+C to copy.');
+        });
+    } else {
+        // Fallback: select the text
+        selectAllKLE();
+        try {
+            document.execCommand('copy');
+            alert('✓ Copied to clipboard!');
+        } catch (err) {
+            alert('Please use Ctrl+C / Cmd+C to copy the selected text.');
+        }
     }
 }
 
@@ -256,11 +504,13 @@ function generateKLEFormat() {
         kleData.push(rowData);
     });
     
-    // Format with line breaks for readability
+    // Format with line breaks for readability and without quotes on property names
     const formattedOutput = JSON.stringify(kleData)
         .replace(/\],\[/g, '],\n[')
         .replace(/^\[\[/, '[')
-        .replace(/\]\]$/, ']');
+        .replace(/\]\]$/, ']')
+        // Remove quotes from property names (a, x, y, etc.)
+        .replace(/"([axywh])"\s*:/g, '$1:');
     
     return formattedOutput;
 }
@@ -280,89 +530,156 @@ function exportPNG() {
     console.log('PNG export started');
     
     try {
-        // Get the actual canvas element that's being displayed
-        const sourceCanvas = document.getElementById('tap-canvas');
-        if (!sourceCanvas) {
-            alert('Canvas not found! Make sure you are in mapping mode.');
+        // Get all keys and tap indicators to calculate bounding box
+        const allKeys = window.keys || [];
+        const definedKeys = allKeys.filter(key => key.clicks > 0);
+        
+        const overlay = document.getElementById('canvas-overlay');
+        const tapIndicators = overlay ? overlay.querySelectorAll('.tap-indicator') : [];
+        
+        if (definedKeys.length === 0 && tapIndicators.length === 0) {
+            alert('No keys or taps to export. Create some keys first!');
             return;
         }
         
-        console.log('Source canvas found:', sourceCanvas.width, 'x', sourceCanvas.height);
+        // Calculate bounding box
+        const KEY_SIZE = 72;
+        const MARGIN = 50; // Margin around content
         
-        // Create a new canvas to combine the main canvas and overlay
+        let minX = Infinity, minY = Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+        
+        // Include keys in bounding box
+        definedKeys.forEach(key => {
+            minX = Math.min(minX, key.x - KEY_SIZE/2);
+            minY = Math.min(minY, key.y - KEY_SIZE/2);
+            maxX = Math.max(maxX, key.x + KEY_SIZE/2);
+            maxY = Math.max(maxY, key.y + KEY_SIZE/2);
+        });
+        
+        // Include tap indicators in bounding box
+        tapIndicators.forEach(indicator => {
+            if (indicator.style.display !== 'none') {
+                const x = parseInt(indicator.style.left) || 0;
+                const y = parseInt(indicator.style.top) || 0;
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x + 12);
+                maxY = Math.max(maxY, y + 12);
+            }
+        });
+        
+        // Create export canvas with calculated size
+        const width = Math.ceil(maxX - minX) + (MARGIN * 2);
+        const height = Math.ceil(maxY - minY) + (MARGIN * 2);
+        
         const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = width;
+        exportCanvas.height = height;
         const ctx = exportCanvas.getContext('2d');
         
-        // Set same dimensions as source canvas
-        exportCanvas.width = sourceCanvas.width;
-        exportCanvas.height = sourceCanvas.height;
+        // Dark background matching the UI
+        ctx.fillStyle = '#1e1e1e';
+        ctx.fillRect(0, 0, width, height);
         
-        // Draw the main canvas content
-        ctx.drawImage(sourceCanvas, 0, 0);
+        // Offset for centering content
+        const offsetX = MARGIN - minX;
+        const offsetY = MARGIN - minY;
         
-        // Get overlay elements and draw them on canvas
-        const overlay = document.getElementById('canvas-overlay');
-        if (overlay) {
-            // Draw tap indicators
-            const tapIndicators = overlay.querySelectorAll('.tap-indicator');
-            tapIndicators.forEach(indicator => {
-                if (indicator.style.display !== 'none') {
-                    const x = parseInt(indicator.style.left);
-                    const y = parseInt(indicator.style.top);
-                    const finger = indicator.className.match(/finger-(\w+)/)?.[1] || 'unknown';
-                    
-                    const colors = {
-                        thumb: '#FF6B6B',
-                        index: '#4ECDC4', 
-                        middle: '#45B7D1',
-                        ring: '#96CEB4',
-                        pinky: '#FFEAA7'
-                    };
-                    
-                    ctx.fillStyle = colors[finger] || '#666';
-                    ctx.globalAlpha = 0.8;
-                    ctx.beginPath();
-                    ctx.arc(x + 6, y + 6, 6, 0, 2 * Math.PI); // +6 to center the circle
-                    ctx.fill();
-                    ctx.globalAlpha = 1;
-                }
-            });
-            
-            // Draw defined keys
-            const keyElements = overlay.querySelectorAll('.canvas-key');
-            keyElements.forEach((keyElement, index) => {
-                if (keyElement.style.display !== 'none') {
-                    const x = parseInt(keyElement.style.left) + 20; // +20 to center
-                    const y = parseInt(keyElement.style.top) + 20;  // +20 to center
-                    const transform = keyElement.style.transform;
-                    const rotation = transform.match(/rotate\((-?\d+)deg\)/)?.[1] || 0;
-                    
-                    ctx.save();
-                    ctx.translate(x, y);
-                    ctx.rotate((parseInt(rotation) * Math.PI) / 180);
-                    
-                    // Key background
-                    ctx.fillStyle = 'rgba(97, 218, 251, 0.3)';
-                    ctx.fillRect(-20, -20, 40, 40);
-                    
-                    // Key border
-                    ctx.strokeStyle = '#61dafb';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(-20, -20, 40, 40);
-                    
-                    // Key number
-                    ctx.fillStyle = '#61dafb';
-                    ctx.font = 'bold 14px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(keyElement.textContent || (index + 1).toString(), 0, 0);
-                    
-                    ctx.restore();
-                }
-            });
+        // Draw grid background
+        const quarterU = 18; // 0.25u grid spacing
+        const oneU = 72; // 1u spacing
+        
+        // Minor grid lines
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 1;
+        
+        for (let x = 0; x <= width; x += quarterU) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
         }
         
-        console.log('Export canvas rendered, size:', exportCanvas.width, 'x', exportCanvas.height);
+        for (let y = 0; y <= height; y += quarterU) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+        
+        // Major grid lines
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 2;
+        
+        for (let x = 0; x <= width; x += oneU) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+        
+        for (let y = 0; y <= height; y += oneU) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+        
+        // Draw tap indicators
+        const colors = {
+            thumb: '#FF6B6B',
+            index: '#4ECDC4', 
+            middle: '#45B7D1',
+            ring: '#96CEB4',
+            pinky: '#FFEAA7'
+        };
+        
+        tapIndicators.forEach(indicator => {
+            if (indicator.style.display !== 'none') {
+                const x = parseInt(indicator.style.left) || 0;
+                const y = parseInt(indicator.style.top) || 0;
+                const finger = indicator.className.match(/finger-(\\w+)/)?.[1] || 'unknown';
+                
+                ctx.fillStyle = colors[finger] || '#666';
+                ctx.globalAlpha = 0.8;
+                ctx.beginPath();
+                ctx.arc(x + offsetX + 6, y + offsetY + 6, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        });
+        
+        // Draw keys
+        definedKeys.forEach((key, index) => {
+            const x = key.x + offsetX;
+            const y = key.y + offsetY;
+            const HALF_KEY = KEY_SIZE / 2;
+            
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((key.rotation * Math.PI) / 180);
+            
+            // Key background
+            ctx.fillStyle = 'rgba(97, 218, 251, 0.3)';
+            ctx.fillRect(-HALF_KEY, -HALF_KEY, KEY_SIZE, KEY_SIZE);
+            
+            // Key border
+            ctx.strokeStyle = '#61dafb';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-HALF_KEY, -HALF_KEY, KEY_SIZE, KEY_SIZE);
+            
+            // Key number
+            ctx.fillStyle = '#61dafb';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText((index + 1).toString(), 0, 0);
+            
+            ctx.restore();
+        });
+        
+        console.log('Export canvas rendered, size:', width, 'x', height);
         
         // Convert to blob and create download
         exportCanvas.toBlob((blob) => {
@@ -397,8 +714,14 @@ function exportPNG() {
 // Make functions globally available
 window.exportPNG = exportPNG;
 window.exportKLE = exportKLE;
-window.copyToClipboard = copyToClipboard;
+window.importKLE = importKLE;
+window.showImportModal = showImportModal;
+window.closeImportModal = closeImportModal;
+window.showExportModal = showExportModal;
 window.closeExportModal = closeExportModal;
+window.selectAllKLE = selectAllKLE;
+window.copyKLEToClipboard = copyKLEToClipboard;
+window.copyToClipboard = copyToClipboard;
 window.toggleFullscreen = toggleFullscreen;
 
 // Export just the key positions as JSON for debugging

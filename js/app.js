@@ -5,7 +5,7 @@ class KeyboardLayoutApp {
             rows: 3,
             cols: 10,
             mappingOrder: 'rows',
-            currentHand: 'left',
+            currentHand: 'right',
             currentFinger: 'thumb',
             currentPosition: { row: 0, col: 0 },
             tapCount: 0,

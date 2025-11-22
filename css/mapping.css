@@ -638,6 +638,7 @@
     max-width: 280px;
     z-index: 1001;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    transition: left 0.3s ease, right 0.3s ease;
 }
 
 .key-panel-header {
@@ -896,6 +897,135 @@
     background: #007acc;
     color: #ffffff;
     border-color: #007acc;
+}
+
+/* Mode info */
+.mode-info {
+    margin-bottom: 10px;
+}
+
+.mode-description {
+    background: #1e1e1e;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #4ec9b0;
+    border: 1px solid #3c3c3c;
+    text-align: center;
+}
+
+/* Fullscreen icon button - top right */
+.fullscreen-icon-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 122, 204, 0.9);
+    color: white;
+    border: 2px solid #569cd6;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.fullscreen-icon-btn:hover {
+    background: rgba(0, 122, 204, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.fullscreen-icon-btn:active {
+    transform: scale(0.95);
+}
+
+/* Move mode options */
+.move-mode-options {
+    margin-bottom: 10px;
+    background: #252526;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #3c3c3c;
+}
+
+.lock-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lock-option-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #cccccc;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 3px;
+    transition: background 0.2s;
+}
+
+.lock-option-label:hover {
+    background: #2d2d30;
+}
+
+.lock-option-label input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: #569cd6;
+}
+
+.lock-option-label span {
+    user-select: none;
+}
+
+/* Export mode options */
+.export-mode-options {
+    margin-bottom: 10px;
+    background: #252526;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #3c3c3c;
+}
+
+.export-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.export-action-btn {
+    padding: 12px 16px;
+    background: #0e639c;
+    color: white;
+    border: 1px solid #569cd6;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.export-action-btn:hover {
+    background: #1177bb;
+    border-color: #4ec9b0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 122, 204, 0.3);
+}
+
+.export-action-btn:active {
+    transform: translateY(0);
 }
 
 /* Free mapping info */

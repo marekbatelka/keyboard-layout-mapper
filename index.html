@@ -45,6 +45,9 @@
                     <!-- Tap indicators will be added here -->
                 </div>
                 
+                <!-- Fullscreen Button (Top Right) -->
+                <button class="fullscreen-icon-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
+                
                 <!-- Key Creation Panel -->
                 <div class="key-panel" id="keyPanel">
                     <div class="key-panel-header">
@@ -52,11 +55,44 @@
                     </div>
                     <div class="key-panel-content">
                         <div class="mode-selector">
-                            <button id="startKeyModeBtn" onclick="startKeyCreationMode()" class="mode-btn">Create Keys</button>
-                            <button id="pauseKeyModeBtn" onclick="pauseKeyCreationMode()" class="mode-btn" style="display: none;">Free Mapping</button>
+                            <button id="moveMode" onclick="setMode('move')" class="mode-btn">Move</button>
+                            <button id="tapMode" onclick="setMode('tap')" class="mode-btn">Tap</button>
+                            <button id="keyMode" onclick="setMode('key')" class="mode-btn active">Key</button>
+                            <button id="exportMode" onclick="setMode('export')" class="mode-btn">Export</button>
                         </div>
 
-                        <div class="free-mapping-info" id="freeMappingInfo">
+                        <div class="mode-info" id="modeInfo">
+                            <div class="mode-description" id="modeDescription">Key Mode: Navigate and edit keys</div>
+                        </div>
+
+                        <!-- Move Mode Options -->
+                        <div class="move-mode-options" id="moveModeOptions" style="display: none;">
+                            <div class="lock-options">
+                                <label class="lock-option-label">
+                                    <input type="checkbox" id="lockKeys" checked>
+                                    <span>Lock Keys</span>
+                                </label>
+                                <label class="lock-option-label">
+                                    <input type="checkbox" id="lockTaps" checked>
+                                    <span>Lock Taps</span>
+                                </label>
+                                <label class="lock-option-label">
+                                    <input type="checkbox" id="lockCanvas">
+                                    <span>Lock Canvas</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Export Mode Options -->
+                        <div class="export-mode-options" id="exportModeOptions" style="display: none;">
+                            <div class="export-buttons">
+                                <button class="export-action-btn" onclick="exportPNG()">📷 Export PNG</button>
+                                <button class="export-action-btn" onclick="exportKLE()">📋 Export KLE</button>
+                                <button class="export-action-btn" onclick="showImportModal()">📥 Import KLE</button>
+                            </div>
+                        </div>
+
+                        <div class="free-mapping-info" id="freeMappingInfo" style="display: none;">
                             <div class="current-status">
                                 <span id="hand-indicator">Left Thumb</span>
                                 <span id="tap-counter">0 taps</span>
@@ -133,15 +169,9 @@
                                 <div class="action-row" id="freeMapActions">
                                     <button class="control-btn clear-btn" onclick="clearCurrentFinger()">Clear</button>
                                     <button class="control-btn reset-btn" onclick="resetMapping()">Reset</button>
-                                    <button class="control-btn export-btn" onclick="exportPNG()">PNG</button>
                                 </div>
                                 <div class="action-row" id="keyCreateActions" style="display: none;">
-                                    <button class="control-btn clear-btn" onclick="clearCurrentKey()">Clear Key</button>
-                                    <button class="control-btn export-btn" onclick="exportPNG()">PNG</button>
-                                    <button class="control-btn export-btn" onclick="exportKLE()">KLE</button>
-                                </div>
-                                <div class="action-row">
-                                    <button class="control-btn fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
+                                    <!-- Export/Import moved to Export mode -->
                                 </div>
                             </div>
                         </div>
@@ -165,6 +195,37 @@
                 <h4>Generated Code:</h4>
                 <textarea id="export-code" readonly></textarea>
                 <button class="btn-copy" onclick="copyToClipboard()">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KLE Import Modal -->
+    <div id="import-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10001; align-items: center; justify-content: center;">
+        <div style="background: #1e1e1e; border: 2px solid #569cd6; border-radius: 8px; padding: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #569cd6;">Import from KLE</h3>
+                <button onclick="closeImportModal()" style="background: #f48771; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-weight: bold;">Close</button>
+            </div>
+            <p style="color: #cccccc; margin-bottom: 15px;">Paste your KLE layout data below:</p>
+            <textarea id="import-kle-input" placeholder="Paste KLE format here..." style="width: 100%; height: 200px; font-family: 'Courier New', monospace; font-size: 13px; border: 1px solid #3c3c3c; border-radius: 4px; padding: 10px; resize: vertical; background: #252526; color: #cccccc;"></textarea>
+            <div style="margin-top: 15px; text-align: right;">
+                <button onclick="importKLE()" style="background: #4ec9b0; color: #1e1e1e; border: none; border-radius: 4px; padding: 10px 20px; cursor: pointer; font-weight: bold; font-size: 14px;">Import Layout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KLE Export Modal -->
+    <div id="export-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10001;">
+        <div style="background: #1e1e1e; border: 2px solid #569cd6; border-radius: 8px; padding: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow: auto; margin: auto; margin-top: 10vh;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #569cd6;">Export to KLE</h3>
+                <button onclick="closeExportModal()" style="background: #f48771; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-weight: bold;">Close</button>
+            </div>
+            <p style="color: #cccccc; margin-bottom: 15px;">Copy the KLE layout data below and paste it into <a href="http://www.keyboard-layout-editor.com" target="_blank" style="color: #569cd6;">keyboard-layout-editor.com</a>:</p>
+            <textarea id="export-kle-output" readonly style="width: 100%; height: 200px; font-family: 'Courier New', monospace; font-size: 13px; border: 1px solid #3c3c3c; border-radius: 4px; padding: 10px; resize: vertical; background: #252526; color: #cccccc;"></textarea>
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="copyKLEToClipboard()" style="background: #0e639c; color: white; border: none; border-radius: 4px; padding: 10px 20px; cursor: pointer; font-weight: bold; font-size: 14px;">Copy to Clipboard</button>
+                <button onclick="selectAllKLE()" style="background: #4ec9b0; color: #1e1e1e; border: none; border-radius: 4px; padding: 10px 20px; cursor: pointer; font-weight: bold; font-size: 14px;">Select All</button>
             </div>
         </div>
     </div>
